@@ -1,0 +1,35 @@
+
+
+<head>
+    <meta charset="UTF-8">
+    <title>Sanctum Widget Dev</title>
+    <style>
+        body {
+            background-color: white;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",  Roboto, 
+                        "Helvetica Neue", Arial, sans-serif;
+        }
+
+        #widget-container {
+            width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div id="widget-container"></div>
+    <script src="/dist/sanctum-client.js"></script>
+
+    <script>
+        // Initialize the Sanctum widget for testing
+        Sanctum.widget.init('widget-container');
+        Sanctum.api.getPublicKey();
+    
+        // Example usage of Sanctum API
+
+      </script>
+</body>

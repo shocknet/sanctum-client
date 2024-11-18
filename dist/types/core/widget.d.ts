@@ -1,0 +1,35 @@
+import { WidgetOptions } from '../types';
+export declare class SanctumWidget {
+    private static readonly SANCTUM_URL;
+    private static readonly WEBSOCKET_URL;
+    private static readonly BASE_BACKOFF_DELAY;
+    private static readonly MAX_BACKOFF_DELAY;
+    private reconnectAttempts;
+    private socket;
+    private container;
+    private options;
+    private requestToken;
+    private tokenManager;
+    private loginStatus;
+    private clientKeyManager;
+    private timerInterval;
+    private secondsLeft;
+    private expiresAt;
+    private promptConfirmLogout;
+    static init(containerId: string, options?: WidgetOptions): void;
+    private constructor();
+    private initialize;
+    private initializeWebSocket;
+    private reconnectWithBackoff;
+    private openSanctumAuth;
+    private setLoginStatus;
+    private startTimer;
+    private stopTimer;
+    private updateTimer;
+    private render;
+    private addStyles;
+    private formatTime;
+    private setPromptConfirmLogout;
+    private handleLogout;
+    private handleSanctumRequest;
+}

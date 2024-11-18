@@ -1,0 +1,34 @@
+
+export enum ErrorCode {
+	// Auth errors
+	SESSION_EXPIRED = 'SESSION_EXPIRED',
+	INVALID_SESSION = 'INVALID_SESSION',
+	ACCESS_TOKEN_INVALID = 'ACCESS_TOKEN_INVALID',
+	ACCESS_FORBIDDEN = 'ACCESS_FORBIDDEN',
+	USER_NOT_FOUND = 'USER_NOT_FOUND',
+
+	// OTP errors
+	OTP_INVALID = 'OTP_INVALID',
+	OTP_NOT_FOUND_OR_EXPIRED = 'OTP_NOT_FOUND_OR_EXPIRED',
+	OTP_ATTEMPTS_EXCEEDED = 'OTP_ATTEMPTS_EXCEEDED',
+
+	// Request token errors
+	REQUEST_TOKEN_NOT_FOUND_OR_EXPIRED = 'REQUEST_TOKEN_NOT_FOUND_OR_EXPIRED',
+	REQUEST_TOKEN_INVALID = 'REQUEST_TOKEN_INVALID',
+
+	// Validation errors
+	INVALID_INPUT = 'INVALID_INPUT',
+
+	// Access token operations errors
+	INVALID_NOSTR_EVENT = "INVALID_NOSTR_EVENT",
+
+	// Generic Errors
+	UNKNOWN_ERROR = 'UNKNOWN_ERROR'
+};
+
+export class SanctumError extends Error {
+	constructor(message: string) {
+	  super(message);
+	  this.name = 'SanctumError';
+	}
+  }
