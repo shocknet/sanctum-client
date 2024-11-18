@@ -22,11 +22,11 @@
 </head>
 <body>
     <div id="widget-container"></div>
-    <script src="/dist/sanctum-client.js"></script>
+    <script src="/dist/browser/sanctum-client.js"></script>
 
     <script>
         // Initialize the Sanctum widget for testing
-        Sanctum.widget.init('widget-container');
+        Sanctum.SanctumWidget.init('widget-container');
         Sanctum.api.getPublicKey();
     
         // Example usage of Sanctum API

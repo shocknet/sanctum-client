@@ -255,8 +255,8 @@ class SanctumWidget {
       }
       .sanctum-widget-container {
         background-color: #1a1a1a;
-        height: 151px;
-        min-height: 151px;
+        min-height: 0;
+        aspect-ratio: 3/1;
         border: 2px solid #32a852;
         border-radius: 5px;
         display: flex;
@@ -278,7 +278,7 @@ class SanctumWidget {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 12px;
+        padding: 5px;
       }
 
       .sanctum-logo span {

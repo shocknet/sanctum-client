@@ -24,5 +24,5 @@ if (typeof window !== 'undefined') {
     };
 }
 
-export { SanctumAPI as api, onTokenChange, SanctumWidget as widget };
+export { SanctumAPI, SanctumWidget, onTokenChange };
 //# sourceMappingURL=index.js.map
