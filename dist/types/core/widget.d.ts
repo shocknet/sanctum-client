@@ -26,10 +26,12 @@ export declare class SanctumWidget {
     private startTimer;
     private stopTimer;
     private updateTimer;
+    private formatIdentifier;
     private render;
     private addStyles;
     private formatTime;
     private setPromptConfirmLogout;
     private handleLogout;
     private handleSanctumRequest;
+    private handleCancel;
 }

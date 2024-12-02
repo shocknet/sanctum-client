@@ -72,49 +72,34 @@ export class SanctumWidget {
 
       this.socket.onopen = () => {
         if (this.socket) {
-          this.socket.send(JSON.stringify({
-            action: "initial_request",
-            data: { clientKey: this.clientKeyManager.getClientKey() }
-          }));
+          this.socket.send(JSON.stringify({ clientKey: this.clientKeyManager.getClientKey() }));
         }
       };
 
       this.socket.onmessage = (event) => {
         try {
           const message = JSON.parse(event.data);
-          const { action, data } = message;
-
-          switch (action) {
-            case "request_token_response":
-              this.requestToken = data.requestToken;
-              this.expiresAt = data.expiresAt;
-              this.openSanctumAuth();
-              this.setLoginStatus('awaiting');
-              break;
-            case "access_token":
-              console.log("Received access token", data);
-              this.tokenManager.setToken(data.accessToken, data.identifier);
-              if (this.options.onSuccess) {
-                this.options.onSuccess(data.token);
-              }
-              this.setLoginStatus('confirmed');
-              this.socket?.close();
-              resolve();
-              break;
-            case "error":
-              console.error("Error from websocket:", data.message)
-              if (this.options.onError) {
-                this.options.onError(data.message);
-              }
-              this.setLoginStatus(null);
-              this.socket?.close();
-              reject(new Error(data.message));
-              break
-            default:
-              console.warn("Unknown action", action)
-              this.setLoginStatus(null);
-              this.socket?.close();
-              reject(new Error("Unknown action"));
+          if (message.requestToken) {
+            this.requestToken = message.requestToken;
+            this.expiresAt = message.expiresAt
+            this.openSanctumAuth();
+            this.setLoginStatus('awaiting');
+          } else if (message.accessToken) {
+            this.tokenManager.setToken(message.accessToken, message.identifier);
+            if (this.options.onSuccess) {
+              this.options.onSuccess(message.accessToken);
+            }
+            this.setLoginStatus('confirmed');
+            this.socket?.close();
+            resolve();
+          } else if (message.error) {
+            console.error("Error from websocket:", message.error)
+            if (this.options.onError) {
+              this.options.onError(message.error);
+            }
+            this.setLoginStatus(null);
+            this.socket?.close();
+            reject(new Error(message.error));
           }
         } catch (error) {
           console.error('Failed to parse WebSocket message:', error);
@@ -181,7 +166,7 @@ export class SanctumWidget {
     const expiresAt = Math.round((this.expiresAt - now) / 1000);
     this.secondsLeft = expiresAt
 
-    
+
     this.timerInterval = window.setInterval(() => {
       const secondsLeft = Math.round((this.expiresAt - Date.now()) / 1000);
       if (secondsLeft < 0) {
@@ -207,6 +192,24 @@ export class SanctumWidget {
     }
   }
 
+  private formatIdentifier(identifier?: string): string {
+    if (!identifier) return ""
+    if (identifier.includes('@')) {
+      const [localPart, domain] = identifier.split('@');
+      if (localPart.length > 3) {
+        return `${localPart.slice(0, 3)}...@${domain}`;
+      }
+      return identifier;
+    }
+
+
+    if (identifier.startsWith('npub')) {
+      return `${identifier.slice(0, 10)}...${identifier.slice(-10)}`;
+    }
+
+    return identifier;
+  };
+
   private render(): void {
     this.container.innerHTML = '';
     this.container.className = 'sanctum-widget-container' + (this.loginStatus === 'confirmed' ? ' when-confirmed' : '');
@@ -227,8 +230,11 @@ export class SanctumWidget {
             ${ICONS.SANDCLOCK}
             <span class="timer-num white-text">${this.formatTime(this.secondsLeft)}</span>
           </div>
-          <span class="gray-text">client_id-${this.clientKeyManager.getClientKey()}</span>
+          <button class="sanctum-cancel-button">Cancel</button>
         `;
+        
+        const cancelBtn = content.querySelector('.sanctum-cancel-button') as HTMLButtonElement;
+        cancelBtn.onclick = () => this.handleCancel();
         break;
 
       case 'confirmed':
@@ -247,11 +253,11 @@ export class SanctumWidget {
           content.classList.add('confirmed');
           content.innerHTML = `
             <div class="logout-cross">
-              ${ICONS.CLOSE}
+              ${ICONS.LOGOUT}
             </div>
             ${ICONS.CHECKED}
 
-            <span class="gray-text">${this.tokenManager.getToken()?.identifier}</span>
+            <span class="gray-text">${this.formatIdentifier(this.tokenManager.getToken()?.identifier)}</span>
             <span class="gray-text">client_id-${this.clientKeyManager.getClientKey()}</span>
           `;
           content.querySelector('.logout-cross')?.addEventListener('click',
@@ -305,7 +311,6 @@ export class SanctumWidget {
         justify-content: center;
         align-items: center;
         position: relative;
-        gap: 7px;
         color: #ffffff;
       }
 
@@ -319,7 +324,7 @@ export class SanctumWidget {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 5px;
+        padding: 12px;
       }
 
       .sanctum-logo span {
@@ -416,8 +421,7 @@ export class SanctumWidget {
       }
 
       .sanctum-login-button {
-        padding: 0 12px;
-        height: 51px;
+        padding: 10px 12px;
         font-weight: 600;
         background-color: #32a852;
         border: none;
@@ -453,6 +457,22 @@ export class SanctumWidget {
         margin: 0;
       }
 
+      .sanctum-cancel-button {
+        padding: 6px 12px;
+        background: transparent;
+        border: 1px solid #8c8c8c;
+        border-radius: 4px;
+        color: #8c8c8c;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .sanctum-cancel-button:hover {
+        border-color: #ffffff;
+        color: #ffffff;
+      }
+
     `;
 
     const styleElement = document.createElement('style');
@@ -481,5 +501,12 @@ export class SanctumWidget {
   private handleSanctumRequest(): void {
     this.setLoginStatus('loading');
     this.initializeWebSocket();
+  }
+
+  private handleCancel(): void {
+    this.socket?.close();
+    this.setLoginStatus(null);
+    this.stopTimer();
+    this.reconnectAttempts = 0;
   }
 }
