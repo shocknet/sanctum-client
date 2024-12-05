@@ -1,7 +1,6 @@
 {
   "name": "sanctum-client",
   "version": "1.0.0",
-  "type": "module",
   "exports": {
     ".": {
       "import": "./dist/esm/index.js",
