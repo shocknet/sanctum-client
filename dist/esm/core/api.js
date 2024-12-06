@@ -105,11 +105,11 @@ class SanctumAPI {
         if (!token) {
             throw new SanctumError('Not authenticated');
         }
-        const result = await this.client.SignNostrEvent({ unsigned_event: event });
+        const result = await this.client.SignNostrEvent({ usignedEvent: event });
         if (result.status === 'ERROR') {
             this.handleError(result.reason);
         }
-        return result.signed_event;
+        return result.signedEvent;
     }
     /**
      * Encrypts data using NIP-44

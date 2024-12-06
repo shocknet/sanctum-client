@@ -10,9 +10,9 @@ class TokenManager {
         }
         return TokenManager.instance;
     }
-    setToken(accessToken, identifier) {
+    setToken(accessToken, accountIdentifier) {
         try {
-            const data = { accessToken, identifier };
+            const data = { accessToken, accountIdentifier };
             localStorage.setItem(TokenManager.STORAGE_KEY, JSON.stringify(data));
             // Dispatch storage event for same-tab notifications
             window.dispatchEvent(new StorageEvent('storage', {
@@ -107,8 +107,8 @@ class ClientKeyManager {
 }
 
 const config = {
-    SANCTUM_URL: "https://auth.shocklab.dev",
-    SANCTUM_WS_URL: "https://auth.shocklab.dev",
+    SANCTUM_URL: "http://localhost:2002",
+    SANCTUM_WS_URL: "ws://localhost:2002",
 };
 // Validate config at build time
 Object.entries(config).forEach(([key, value]) => {
@@ -183,9 +183,6 @@ class SanctumWidget {
         const data = this.tokenManager.getToken();
         if (data) {
             this.setLoginStatus('confirmed');
-            if (this.options.onSuccess) {
-                this.options.onSuccess(data.accessToken);
-            }
         }
         this.render();
     }
@@ -210,9 +207,9 @@ class SanctumWidget {
                         this.setLoginStatus('awaiting');
                     }
                     else if (message.accessToken) {
-                        this.tokenManager.setToken(message.accessToken, message.identifier);
+                        this.tokenManager.setToken(message.accessToken, message.accountIdentifier);
                         if (this.options.onSuccess) {
-                            this.options.onSuccess(message.accessToken);
+                            this.options.onSuccess(message.accessToken, message.identifier);
                         }
                         this.setLoginStatus('confirmed');
                         this.socket?.close();
@@ -362,7 +359,7 @@ class SanctumWidget {
             </div>
             ${ICONS.CHECKED}
 
-            <span class="gray-text">${this.formatIdentifier(this.tokenManager.getToken()?.identifier)}</span>
+            <span class="gray-text">${this.formatIdentifier(this.tokenManager.getToken()?.accountIdentifier)}</span>
             <span class="gray-text">client_id-${this.clientKeyManager.getClientKey()}</span>
           `;
                     content.querySelector('.logout-cross')?.addEventListener('click', () => this.setPromptConfirmLogout(true));
@@ -967,11 +964,11 @@ class SanctumAPI {
         if (!token) {
             throw new SanctumError('Not authenticated');
         }
-        const result = await this.client.SignNostrEvent({ unsigned_event: event });
+        const result = await this.client.SignNostrEvent({ usignedEvent: event });
         if (result.status === 'ERROR') {
             this.handleError(result.reason);
         }
-        return result.signed_event;
+        return result.signedEvent;
     }
     /**
      * Encrypts data using NIP-44
