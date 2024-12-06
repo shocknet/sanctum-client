@@ -1,5 +1,5 @@
 export interface WidgetOptions {
-  onSuccess?: (token: string) => void;
+  onSuccess?: (token: string, identifier: string | null) => void;
   onError?: (error: string) => void;
 }
 

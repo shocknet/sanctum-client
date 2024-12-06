@@ -55,9 +55,6 @@ export class SanctumWidget {
     const data = this.tokenManager.getToken();
     if (data) {
       this.setLoginStatus('confirmed');
-      if (this.options.onSuccess) {
-        this.options.onSuccess(data.accessToken);
-      }
     }
     this.render();
   }
@@ -85,9 +82,9 @@ export class SanctumWidget {
             this.openSanctumAuth();
             this.setLoginStatus('awaiting');
           } else if (message.accessToken) {
-            this.tokenManager.setToken(message.accessToken, message.identifier);
+            this.tokenManager.setToken(message.accessToken, message.accountIdentifier);
             if (this.options.onSuccess) {
-              this.options.onSuccess(message.accessToken);
+              this.options.onSuccess(message.accessToken, message.identifier);
             }
             this.setLoginStatus('confirmed');
             this.socket?.close();
@@ -257,7 +254,7 @@ export class SanctumWidget {
             </div>
             ${ICONS.CHECKED}
 
-            <span class="gray-text">${this.formatIdentifier(this.tokenManager.getToken()?.identifier)}</span>
+            <span class="gray-text">${this.formatIdentifier(this.tokenManager.getToken()?.accountIdentifier)}</span>
             <span class="gray-text">client_id-${this.clientKeyManager.getClientKey()}</span>
           `;
           content.querySelector('.logout-cross')?.addEventListener('click',

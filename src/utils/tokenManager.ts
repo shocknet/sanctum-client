@@ -1,6 +1,6 @@
 export interface TokenData {
   accessToken: string;
-  identifier: string;
+  accountIdentifier: string;
 }
 
 export class TokenManager {
@@ -16,9 +16,9 @@ export class TokenManager {
     return TokenManager.instance;
   }
 
-  public setToken(accessToken: string, identifier: string): void {
+  public setToken(accessToken: string, accountIdentifier: string): void {
     try {
-      const data: TokenData = { accessToken, identifier };
+      const data: TokenData = { accessToken, accountIdentifier };
       localStorage.setItem(TokenManager.STORAGE_KEY, JSON.stringify(data));
       // Dispatch storage event for same-tab notifications
       window.dispatchEvent(new StorageEvent('storage', {
