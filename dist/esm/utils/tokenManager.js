@@ -8,9 +8,9 @@ class TokenManager {
         }
         return TokenManager.instance;
     }
-    setToken(accessToken, identifier) {
+    setToken(accessToken, accountIdentifier) {
         try {
-            const data = { accessToken, identifier };
+            const data = { accessToken, accountIdentifier };
             localStorage.setItem(TokenManager.STORAGE_KEY, JSON.stringify(data));
             // Dispatch storage event for same-tab notifications
             window.dispatchEvent(new StorageEvent('storage', {

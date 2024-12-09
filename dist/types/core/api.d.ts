@@ -4,24 +4,27 @@ export declare class SanctumAPI {
     private static config;
     private static client;
     private static handleSessionExpired;
+    private static handleInvalidToken;
     private static handleError;
     /**
-     * Configures how the API handles session expiry
-     * @param config - Configuration options
-     * @param {('redirect'|'clear')} config.sessionExpiredAction - How to handle expired sessions:
-     *   - 'redirect': Opens Sanctum login in a new tab for the user to re-login (default)
-     *   - 'clear': Clears the Sanctum token
-     * @example
-     * // Configure to redirect on session expiry
-     * SanctumAPI.configure({
-     *   sessionExpiredAction: 'redirect'
-     * });
-     *
-     * // Configure to clear token on session expiry
-     * SanctumAPI.configure({
-     *   sessionExpiredAction: 'clear'
-     * });
-     */
+   * Configures how the API handles session expiry and invalid tokens
+   * @param config - Configuration options
+   * @param {SessionExpiredHandler} config.onSessionExpired - Handler for expired sessions
+   * @param {InvalidTokenHandler} config.onInvalidToken - Handler for invalid tokens
+   * @example
+   * // Configure session expiry and invalid token handlers
+   * SanctumAPI.configure({
+   *   onSessionExpired: (clearToken, redirect) => {
+   *     analytics.track('session_expired');
+   *     clearToken();
+   *     redirect();
+   *   },
+   *   onInvalidToken: (clearToken) => {
+   *     analytics.track('invalid_token');
+   *     clearToken();
+   *   }
+   * });
+   */
     static configure(config: SanctumAPIConfig): void;
     /**
    * Gets the Nostr public key for the current user

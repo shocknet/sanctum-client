@@ -3,6 +3,15 @@ export interface WidgetOptions {
   onError?: (error: string) => void;
 }
 
+export type SessionExpiredHandler = (
+  clearToken: () => void,
+  redirectToReLogin: () => void
+) => void;
+
+export type InvalidTokenHanlder = (
+  clearToken: () => void
+) => void;
 export interface SanctumAPIConfig {
-  sessionExpiredAction: 'redirect' | 'clear';
+  onSessionExpired: SessionExpiredHandler;
+  onInvalidToken: InvalidTokenHanlder;
 }
