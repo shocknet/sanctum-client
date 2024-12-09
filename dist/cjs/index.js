@@ -107,8 +107,8 @@ class ClientKeyManager {
 }
 
 const config = {
-    SANCTUM_URL: "http://localhost:2002",
-    SANCTUM_WS_URL: "ws://localhost:2002",
+    SANCTUM_URL: "https://auth.shocklab.dev",
+    SANCTUM_WS_URL: "ws://auth.shocklab.dev",
 };
 // Validate config at build time
 Object.entries(config).forEach(([key, value]) => {
