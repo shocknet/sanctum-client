@@ -865,7 +865,7 @@ var httpClient = (params) => ({
 class SanctumAPI {
     static tokenManager = TokenManager.getInstance();
     static config = {
-        sessionExpiredAction: 'redirect'
+        onSessionExpired: (_, redirect) => redirect()
     };
     static client = httpClient({
         baseUrl: config.SANCTUM_URL,
@@ -882,12 +882,9 @@ class SanctumAPI {
         deviceId: '',
     });
     static handleSessionExpired() {
-        if (this.config.sessionExpiredAction === 'redirect') {
-            window.open(config.SANCTUM_URL, '_blank');
-        }
-        else {
-            this.tokenManager.clearToken();
-        }
+        const cleartoken = () => this.tokenManager.clearToken();
+        const redirectToReLogin = () => window.open(config.SANCTUM_URL, '_blank');
+        this.config.onSessionExpired?.(cleartoken, redirectToReLogin);
     }
     static handleError(reason) {
         switch (reason) {
@@ -902,22 +899,35 @@ class SanctumAPI {
         throw new Error(reason);
     }
     /**
-     * Configures how the API handles session expiry
-     * @param config - Configuration options
-     * @param {('redirect'|'clear')} config.sessionExpiredAction - How to handle expired sessions:
-     *   - 'redirect': Opens Sanctum login in a new tab for the user to re-login (default)
-     *   - 'clear': Clears the Sanctum token
-     * @example
-     * // Configure to redirect on session expiry
-     * SanctumAPI.configure({
-     *   sessionExpiredAction: 'redirect'
-     * });
-     *
-     * // Configure to clear token on session expiry
-     * SanctumAPI.configure({
-     *   sessionExpiredAction: 'clear'
-     * });
-     */
+       * Configures how the API handles session expiry
+       * @param config - Configuration options
+       * @param {SessionExpiredHandler} config.onSessionExpired - Handler for expired sessions
+       * @example
+       * // Configure to clear token and show notification
+       * SanctumAPI.configure({
+       *   onSessionExpired: (clearToken, redirect) => {
+       *     clearToken();
+       *     showNotification('Session expired');
+       *   }
+       * });
+       *
+       * // Configure to redirect and track analytics
+       * SanctumAPI.configure({
+       *   onSessionExpired: (clearToken, redirect) => {
+       *     analytics.track('session_expired');
+       *     redirect();
+       *   }
+       * });
+       *
+       * // Configure to do both
+       * SanctumAPI.configure({
+       *   onSessionExpired: (clearToken, redirect) => {
+       *     clearToken();
+       *     analytics.track('session_expired');
+       *     redirect();
+       *   }
+       * });
+       */
     static configure(config) {
         this.config = { ...this.config, ...config };
     }
