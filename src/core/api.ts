@@ -1,5 +1,5 @@
 import { TokenManager } from '../utils/tokenManager';
-import { SanctumAPIConfig } from '../types';
+import { SanctumAPIConfig, SessionExpiredHandler, InvalidTokenHanlder } from '../types';
 import { config } from '../utils/config';
 import httpClient from '../proto/http-client';
 import { ErrorCode, SanctumError } from '../utils/errors';
@@ -8,7 +8,8 @@ import { ErrorCode, SanctumError } from '../utils/errors';
 export class SanctumAPI {
   private static tokenManager = TokenManager.getInstance();
   private static config: SanctumAPIConfig = {
-    onSessionExpired: (_, redirect) => redirect()
+    onSessionExpired: (_, redirect) => redirect(),
+    onInvalidToken: (clearToken) => clearToken()
   }
   private static client = httpClient({
     baseUrl: config.SANCTUM_URL,
@@ -29,14 +30,19 @@ export class SanctumAPI {
     const cleartoken = () => this.tokenManager.clearToken();
     const redirectToReLogin = () => window.open(config.SANCTUM_URL, '_blank');
 
-    this.config.onSessionExpired?.(cleartoken, redirectToReLogin)
+    this.config.onSessionExpired(cleartoken, redirectToReLogin)
+  }
+
+  private static handleInvalidToken() {
+    const clearToken = () => this.tokenManager.clearToken();
+    this.config.onInvalidToken(clearToken);
   }
 
   private static handleError(reason: string): never {
     switch (reason) {
       case ErrorCode.ACCESS_TOKEN_INVALID:
       case ErrorCode.ACCESS_FORBIDDEN:
-        this.tokenManager.clearToken();
+        this.handleInvalidToken();
         break;
       case ErrorCode.SESSION_EXPIRED:
         this.handleSessionExpired();
@@ -46,35 +52,24 @@ export class SanctumAPI {
   }
 
   /**
-     * Configures how the API handles session expiry
-     * @param config - Configuration options
-     * @param {SessionExpiredHandler} config.onSessionExpired - Handler for expired sessions
-     * @example
-     * // Configure to clear token and show notification
-     * SanctumAPI.configure({
-     *   onSessionExpired: (clearToken, redirect) => {
-     *     clearToken();
-     *     showNotification('Session expired');
-     *   }
-     * });
-     * 
-     * // Configure to redirect and track analytics
-     * SanctumAPI.configure({
-     *   onSessionExpired: (clearToken, redirect) => {
-     *     analytics.track('session_expired');
-     *     redirect();
-     *   }
-     * });
-     * 
-     * // Configure to do both
-     * SanctumAPI.configure({
-     *   onSessionExpired: (clearToken, redirect) => {
-     *     clearToken();
-     *     analytics.track('session_expired');
-     *     redirect();
-     *   }
-     * });
-     */
+ * Configures how the API handles session expiry and invalid tokens
+ * @param config - Configuration options
+ * @param {SessionExpiredHandler} config.onSessionExpired - Handler for expired sessions
+ * @param {InvalidTokenHandler} config.onInvalidToken - Handler for invalid tokens
+ * @example
+ * // Configure session expiry and invalid token handlers
+ * SanctumAPI.configure({
+ *   onSessionExpired: (clearToken, redirect) => {
+ *     analytics.track('session_expired');
+ *     clearToken();
+ *     redirect();
+ *   },
+ *   onInvalidToken: (clearToken) => {
+ *     analytics.track('invalid_token');
+ *     clearToken();
+ *   }
+ * });
+ */
   static configure(config: SanctumAPIConfig): void {
     this.config = { ...this.config, ...config };
   }
