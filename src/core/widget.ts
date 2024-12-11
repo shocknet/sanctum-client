@@ -493,6 +493,9 @@ export class SanctumWidget {
     this.tokenManager.clearToken();
     this.setLoginStatus(null);
     this.setPromptConfirmLogout(false);
+    if (this.options.onLogout) {
+      this.options.onLogout();
+    }
   }
 
   private handleSanctumRequest(): void {

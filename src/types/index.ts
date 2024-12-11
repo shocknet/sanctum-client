@@ -1,6 +1,7 @@
 export interface WidgetOptions {
   onSuccess?: (token: string, identifier: string | null) => void;
   onError?: (error: string) => void;
+  onLogout?: () => void;
 }
 
 export type SessionExpiredHandler = (
