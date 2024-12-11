@@ -108,7 +108,7 @@ class ClientKeyManager {
 
 const config = {
     SANCTUM_URL: "https://auth.shock.network/",
-    SANCTUM_WS_URL: "https://auth.shock.network/",
+    SANCTUM_WS_URL: "wss://auth.shock.network/",
 };
 // Validate config at build time
 Object.entries(config).forEach(([key, value]) => {
