@@ -1,8 +1,9 @@
 import { SanctumAPIConfig } from '../types';
 export declare class SanctumAPI {
+    private static _client;
     private static tokenManager;
     private static config;
-    private static client;
+    private static get client();
     private static handleSessionExpired;
     private static handleInvalidToken;
     private static handleError;

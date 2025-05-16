@@ -2,12 +2,12 @@ import { TokenManager } from '../utils/tokenManager.js';
 import { ICONS } from '../constants/assets.js';
 import img from '../assets/santum_huge.png.js';
 import { ClientKeyManager } from '../utils/clientKeyManager.js';
-import { config } from '../utils/config.js';
+import { getConfig } from '../utils/config.js';
 import { SanctumError } from '../utils/errors.js';
 
 class SanctumWidget {
-    static SANCTUM_URL = config.SANCTUM_URL;
-    static WEBSOCKET_URL = config.SANCTUM_WS_URL;
+    static SANCTUM_URL = getConfig().url;
+    static WEBSOCKET_URL = getConfig().websocketUrl;
     static BASE_BACKOFF_DELAY = 1000; // Base delay of 1 second
     static MAX_BACKOFF_DELAY = 30000; // Max delay of 30 seconds
     reconnectAttempts = 0;
@@ -30,6 +30,7 @@ class SanctumWidget {
         if (!element) {
             throw new SanctumError(`Container element with id "${containerId}" not found`);
         }
+        if (!getConfig().url) ;
         this.container = element;
         this.options = options;
         this.tokenManager = TokenManager.getInstance();

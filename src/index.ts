@@ -1,6 +1,7 @@
 import { SanctumWidget } from './core/widget';
 import { SanctumAPI } from './core/api';
 import { TokenData, TokenManager } from './utils/tokenManager';
+import { setConfig, SanctumConfig } from './utils/config';
 
 export { SanctumWidget, SanctumAPI }
 
@@ -22,6 +23,9 @@ export function onTokenChange(callback: (data: TokenData | null) => void): () =>
   return () => window.removeEventListener('storage', handler);
 }
 
+export function initSanctum(config: SanctumConfig) {
+  setConfig(config);
+}
 // Add support for global usage when loaded via script tag
 declare global {
   interface Window {
@@ -29,6 +33,7 @@ declare global {
       widget: typeof SanctumWidget;
       api: typeof SanctumAPI;
       onTokenChange: typeof onTokenChange;
+      initSanctum: typeof initSanctum;
     }
   }
 }
@@ -37,6 +42,7 @@ if (typeof window !== 'undefined') {
   window.Sanctum = {
     widget: SanctumWidget,
     api: SanctumAPI,
-    onTokenChange
+    onTokenChange,
+    initSanctum
   };
 }

@@ -1,6 +1,7 @@
 import { SanctumWidget } from './core/widget.js';
 import { SanctumAPI } from './core/api.js';
 import { TokenManager } from './utils/tokenManager.js';
+import { setConfig } from './utils/config.js';
 
 function onTokenChange(callback) {
     const handler = (event) => {
@@ -16,13 +17,17 @@ function onTokenChange(callback) {
     // Return cleanup function
     return () => window.removeEventListener('storage', handler);
 }
+function initSanctum(config) {
+    setConfig(config);
+}
 if (typeof window !== 'undefined') {
     window.Sanctum = {
         widget: SanctumWidget,
         api: SanctumAPI,
-        onTokenChange
+        onTokenChange,
+        initSanctum
     };
 }
 
-export { SanctumAPI, SanctumWidget, onTokenChange };
+export { SanctumAPI, SanctumWidget, initSanctum, onTokenChange };
 //# sourceMappingURL=index.js.map

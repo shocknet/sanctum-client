@@ -106,16 +106,34 @@ class ClientKeyManager {
     }
 }
 
-const config = {
-    SANCTUM_URL: "https://auth.shocklab.dev",
-    SANCTUM_WS_URL: "wss://auth.shocklab.dev",
-};
-// Validate config at build time
-Object.entries(config).forEach(([key, value]) => {
-    if (!value) {
-        throw new Error(`Missing required environment variable: ${key}`);
+let config = null;
+function assertUrl(label, value) {
+    if (typeof value !== 'string')
+        throw new Error(`${label} must be a string`);
+    try {
+        new URL(value); // built-in URL parser
     }
-});
+    catch {
+        throw new Error(`${label} is not a valid URL: ${value}`);
+    }
+}
+function getConfig() {
+    if (!config) {
+        throw new Error('sanctum-client not initialised. Call initSanctum({ SANCTUM_URL, SANCTUM_WS_URL }).');
+    }
+    return config;
+}
+function setConfig(c) {
+    if (config) {
+        throw new Error('sanctum-client already initialised; initSanctum must be called only once.');
+    }
+    if (c.url && !c.websocketUrl) {
+        c.websocketUrl = c.url.replace(/^http/, 'ws');
+    }
+    assertUrl('url', c.url);
+    assertUrl('websocketUrl', c.websocketUrl);
+    config = c;
+}
 
 var ErrorCode;
 (function (ErrorCode) {
@@ -147,8 +165,8 @@ class SanctumError extends Error {
 }
 
 class SanctumWidget {
-    static SANCTUM_URL = config.SANCTUM_URL;
-    static WEBSOCKET_URL = config.SANCTUM_WS_URL;
+    static SANCTUM_URL = getConfig().url;
+    static WEBSOCKET_URL = getConfig().websocketUrl;
     static BASE_BACKOFF_DELAY = 1000; // Base delay of 1 second
     static MAX_BACKOFF_DELAY = 30000; // Max delay of 30 seconds
     reconnectAttempts = 0;
@@ -171,6 +189,7 @@ class SanctumWidget {
         if (!element) {
             throw new SanctumError(`Container element with id "${containerId}" not found`);
         }
+        if (!getConfig().url) ;
         this.container = element;
         this.options = options;
         this.tokenManager = TokenManager.getInstance();
@@ -866,28 +885,34 @@ var httpClient = (params) => ({
 });
 
 class SanctumAPI {
+    static _client;
     static tokenManager = TokenManager.getInstance();
     static config = {
         onSessionExpired: (_, redirect) => redirect(),
         onInvalidToken: (clearToken) => clearToken()
     };
-    static client = httpClient({
-        baseUrl: config.SANCTUM_URL,
-        // Get access token from TokenManager
-        retrieveAccessTokenAuth: async () => {
-            const tokenData = SanctumAPI.tokenManager.getToken();
-            return tokenData ? tokenData.accessToken : null;
-        },
-        // These are required but unused
-        encryptCallback: async () => { throw new Error("encryption not enabled"); },
-        decryptCallback: async () => { throw new Error("encryption not enabled"); },
-        retrieveGuestAuth: async () => { return ""; },
-        retrieveUserAuth: async () => { throw new Error("User routes not enabled"); },
-        deviceId: '',
-    });
+    static get client() {
+        if (!this._client) {
+            this._client = httpClient({
+                baseUrl: getConfig().url,
+                // Get access token from TokenManager
+                retrieveAccessTokenAuth: async () => {
+                    const tokenData = SanctumAPI.tokenManager.getToken();
+                    return tokenData ? tokenData.accessToken : null;
+                },
+                // These are required but unused
+                encryptCallback: async () => { throw new Error("encryption not enabled"); },
+                decryptCallback: async () => { throw new Error("encryption not enabled"); },
+                retrieveGuestAuth: async () => { return ""; },
+                retrieveUserAuth: async () => { throw new Error("User routes not enabled"); },
+                deviceId: '',
+            });
+        }
+        return this._client;
+    }
     static handleSessionExpired() {
         const cleartoken = () => this.tokenManager.clearToken();
-        const redirectToReLogin = () => window.open(config.SANCTUM_URL, '_blank');
+        const redirectToReLogin = () => window.open(getConfig().url, '_blank');
         this.config.onSessionExpired(cleartoken, redirectToReLogin);
     }
     static handleInvalidToken() {
@@ -1052,15 +1077,20 @@ function onTokenChange(callback) {
     // Return cleanup function
     return () => window.removeEventListener('storage', handler);
 }
+function initSanctum(config) {
+    setConfig(config);
+}
 if (typeof window !== 'undefined') {
     window.Sanctum = {
         widget: SanctumWidget,
         api: SanctumAPI,
-        onTokenChange
+        onTokenChange,
+        initSanctum
     };
 }
 
 exports.SanctumAPI = SanctumAPI;
 exports.SanctumWidget = SanctumWidget;
+exports.initSanctum = initSanctum;
 exports.onTokenChange = onTokenChange;
 //# sourceMappingURL=index.js.map

@@ -1,31 +1,37 @@
 import { TokenManager } from '../utils/tokenManager.js';
-import { config } from '../utils/config.js';
+import { getConfig } from '../utils/config.js';
 import httpClient from '../proto/http-client.js';
 import { ErrorCode, SanctumError } from '../utils/errors.js';
 
 class SanctumAPI {
+    static _client;
     static tokenManager = TokenManager.getInstance();
     static config = {
         onSessionExpired: (_, redirect) => redirect(),
         onInvalidToken: (clearToken) => clearToken()
     };
-    static client = httpClient({
-        baseUrl: config.SANCTUM_URL,
-        // Get access token from TokenManager
-        retrieveAccessTokenAuth: async () => {
-            const tokenData = SanctumAPI.tokenManager.getToken();
-            return tokenData ? tokenData.accessToken : null;
-        },
-        // These are required but unused
-        encryptCallback: async () => { throw new Error("encryption not enabled"); },
-        decryptCallback: async () => { throw new Error("encryption not enabled"); },
-        retrieveGuestAuth: async () => { return ""; },
-        retrieveUserAuth: async () => { throw new Error("User routes not enabled"); },
-        deviceId: '',
-    });
+    static get client() {
+        if (!this._client) {
+            this._client = httpClient({
+                baseUrl: getConfig().url,
+                // Get access token from TokenManager
+                retrieveAccessTokenAuth: async () => {
+                    const tokenData = SanctumAPI.tokenManager.getToken();
+                    return tokenData ? tokenData.accessToken : null;
+                },
+                // These are required but unused
+                encryptCallback: async () => { throw new Error("encryption not enabled"); },
+                decryptCallback: async () => { throw new Error("encryption not enabled"); },
+                retrieveGuestAuth: async () => { return ""; },
+                retrieveUserAuth: async () => { throw new Error("User routes not enabled"); },
+                deviceId: '',
+            });
+        }
+        return this._client;
+    }
     static handleSessionExpired() {
         const cleartoken = () => this.tokenManager.clearToken();
-        const redirectToReLogin = () => window.open(config.SANCTUM_URL, '_blank');
+        const redirectToReLogin = () => window.open(getConfig().url, '_blank');
         this.config.onSessionExpired(cleartoken, redirectToReLogin);
     }
     static handleInvalidToken() {

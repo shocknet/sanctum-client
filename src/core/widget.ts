@@ -3,14 +3,14 @@ import { WidgetOptions } from '../types';
 import { ICONS } from '../constants/assets';
 import SANCTUM_LOGO from '../assets/santum_huge.png';
 import { ClientKeyManager } from '../utils/clientKeyManager';
-import { config } from '../utils/config';
+import { getConfig } from '../utils/config';
 import { SanctumError } from '../utils/errors';
 
 type LoginStatus = null | "loading" | "awaiting" | "confirmed";
 
 export class SanctumWidget {
-  private static readonly SANCTUM_URL = config.SANCTUM_URL;
-  private static readonly WEBSOCKET_URL = config.SANCTUM_WS_URL;
+  private static readonly SANCTUM_URL = getConfig().url;
+  private static readonly WEBSOCKET_URL = getConfig().websocketUrl;
 
   private static readonly BASE_BACKOFF_DELAY = 1000; // Base delay of 1 second
   private static readonly MAX_BACKOFF_DELAY = 30000; // Max delay of 30 seconds
@@ -37,6 +37,10 @@ export class SanctumWidget {
     const element = document.getElementById(containerId);
     if (!element) {
       throw new SanctumError(`Container element with id "${containerId}" not found`);
+    }
+
+    if (!getConfig().url) {
+
     }
 
     this.container = element;

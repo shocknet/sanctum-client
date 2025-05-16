@@ -1,4 +1,6 @@
-export declare const config: {
-    SANCTUM_URL: string;
-    SANCTUM_WS_URL: string;
-};
+export interface SanctumConfig {
+    url: string;
+    websocketUrl: string;
+}
+export declare function getConfig(): SanctumConfig;
+export declare function setConfig(c: Partial<SanctumConfig>): void;
