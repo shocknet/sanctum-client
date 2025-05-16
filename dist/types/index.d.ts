@@ -4,7 +4,7 @@ import { TokenData } from './utils/tokenManager';
 import { SanctumConfig } from './utils/config';
 export { SanctumWidget, SanctumAPI };
 export declare function onTokenChange(callback: (data: TokenData | null) => void): () => void;
-export declare function initSanctum(config: SanctumConfig): void;
+export declare function initSanctum(config: Partial<SanctumConfig>): void;
 declare global {
     interface Window {
         Sanctum: {

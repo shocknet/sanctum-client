@@ -23,7 +23,7 @@ export function onTokenChange(callback: (data: TokenData | null) => void): () =>
   return () => window.removeEventListener('storage', handler);
 }
 
-export function initSanctum(config: SanctumConfig) {
+export function initSanctum(config: Partial<SanctumConfig>) {
   setConfig(config);
 }
 // Add support for global usage when loaded via script tag
