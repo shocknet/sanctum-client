@@ -20,7 +20,7 @@ function setConfig(c) {
         throw new Error('sanctum-client already initialised; initSanctum must be called only once.');
     }
     if (c.url && !c.websocketUrl) {
-        c.websocketUrl = c.url.replace(/^http/, 'ws');
+        c.websocketUrl = c.url.replace(/^http/, 'ws').replace(/^https/, 'wss');
     }
     assertUrl('url', c.url);
     assertUrl('websocketUrl', c.websocketUrl);
