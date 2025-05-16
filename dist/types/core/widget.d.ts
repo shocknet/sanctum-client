@@ -1,7 +1,7 @@
 import { WidgetOptions } from '../types';
 export declare class SanctumWidget {
-    private static readonly SANCTUM_URL;
-    private static readonly WEBSOCKET_URL;
+    private readonly SANCTUM_URL;
+    private readonly WEBSOCKET_URL;
     private static readonly BASE_BACKOFF_DELAY;
     private static readonly MAX_BACKOFF_DELAY;
     private reconnectAttempts;

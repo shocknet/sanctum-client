@@ -20,7 +20,7 @@ function assertUrl(label: string, value: unknown): asserts value is string {
 export function getConfig(): SanctumConfig {
   if (!config) {
     throw new Error(
-      'sanctum-client not initialised. Call initSanctum({ SANCTUM_URL, SANCTUM_WS_URL }).'
+      'sanctum-client not initialised. Call initSanctum({ url, websocketUrl? }).'
     );
   }
   return config;

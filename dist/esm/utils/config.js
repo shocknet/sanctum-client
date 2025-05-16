@@ -11,7 +11,7 @@ function assertUrl(label, value) {
 }
 function getConfig() {
     if (!config) {
-        throw new Error('sanctum-client not initialised. Call initSanctum({ SANCTUM_URL, SANCTUM_WS_URL }).');
+        throw new Error('sanctum-client not initialised. Call initSanctum({ url, websocketUrl? }).');
     }
     return config;
 }

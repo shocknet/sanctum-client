@@ -6,8 +6,8 @@ import { getConfig } from '../utils/config.js';
 import { SanctumError } from '../utils/errors.js';
 
 class SanctumWidget {
-    static SANCTUM_URL = getConfig().url;
-    static WEBSOCKET_URL = getConfig().websocketUrl;
+    SANCTUM_URL;
+    WEBSOCKET_URL;
     static BASE_BACKOFF_DELAY = 1000; // Base delay of 1 second
     static MAX_BACKOFF_DELAY = 30000; // Max delay of 30 seconds
     reconnectAttempts = 0;
@@ -30,7 +30,9 @@ class SanctumWidget {
         if (!element) {
             throw new SanctumError(`Container element with id "${containerId}" not found`);
         }
-        if (!getConfig().url) ;
+        const config = getConfig();
+        this.SANCTUM_URL = config.url;
+        this.WEBSOCKET_URL = config.websocketUrl;
         this.container = element;
         this.options = options;
         this.tokenManager = TokenManager.getInstance();
@@ -51,7 +53,7 @@ class SanctumWidget {
             this.socket.close();
         }
         return new Promise((resolve, reject) => {
-            this.socket = new WebSocket(SanctumWidget.WEBSOCKET_URL);
+            this.socket = new WebSocket(this.WEBSOCKET_URL);
             this.socket.onopen = () => {
                 if (this.socket) {
                     this.socket.send(JSON.stringify({ clientKey: this.clientKeyManager.getClientKey() }));
@@ -120,7 +122,7 @@ class SanctumWidget {
             console.error('No request token available');
             return;
         }
-        const authUrl = new URL(`/auth/requestToken/${this.requestToken}`, SanctumWidget.SANCTUM_URL);
+        const authUrl = new URL(`/auth/requestToken/${this.requestToken}`, this.SANCTUM_URL);
         window.open(authUrl.toString(), '_blank');
     }
     setLoginStatus(status) {
