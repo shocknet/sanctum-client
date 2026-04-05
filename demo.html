@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SanctumSDK Demo</title>
+  <style>
+    :root { --bg: #0f1520; --panel: #1a2432; --border: #2b3a4d; --text: #e8f0fb; --muted: #9fb1c7; --brand: #3c8fff; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); max-width: 100%; overflow-x: hidden; }
+    * { box-sizing: border-box; font-family: Inter, system-ui, sans-serif; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 24px; display: grid; gap: 12px; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px; overflow-x: hidden; }
+    .row { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    h1, h2 { margin: 0 0 10px; }
+    h2 { font-size: 16px; color: var(--muted); }
+    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    input, select, textarea, button { width: 100%; border-radius: 8px; border: 1px solid var(--border); background: #0c131d; color: var(--text); padding: 9px 10px; }
+    textarea { min-height: 88px; resize: vertical; }
+    button { background: var(--brand); border: none; font-weight: 600; cursor: pointer; }
+    button.secondary { background: #2b3a50; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
+    #tokenState, #logs { max-height: 260px; overflow: auto; background: #0a1118; border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+    #widget-host { max-width: 100%; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="card">
+      <h1>SanctumSDK</h1>
+      <h2>Instance-based SDK demo</h2>
+    </section>
+
+    <section class="card">
+      <h2>1) Create and initialize client</h2>
+      <div class="row">
+        <div>
+          <label for="url">URL</label>
+          <input id="url" value="http://localhost:2002" />
+        </div>
+        <div>
+          <label for="wsUrl">Websocket URL</label>
+          <input id="wsUrl" value="ws://localhost:2002" />
+        </div>
+      </div>
+      <div class="row" style="margin-top: 8px;">
+        <button id="initBtn">Create Client + init()</button>
+      </div>
+      <div id="status" style="margin-top:8px; color: var(--muted);">Not initialized.</div>
+    </section>
+
+    <section class="card">
+      <h2>2) Mount closed widget and authenticate</h2>
+      <div class="row">
+        <div>
+          <label for="theme">Theme</label>
+          <select id="theme">
+            <option value="system" selected>system</option>
+            <option value="light">light</option>
+            <option value="dark">dark</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" style="margin-top: 8px;">
+        <button id="mountWidgetBtn" class="secondary" disabled>Mount Widget</button>
+        <button id="unmountWidgetBtn" class="secondary" disabled>Unmount Widget</button>
+      </div>
+      <div id="widget-host" style="margin-top: 10px;"></div>
+    </section>
+
+    <section class="card">
+      <h2>3) Core API calls (enabled after auth)</h2>
+      <div class="row">
+        <button id="pubkeyBtn" class="secondary" disabled>getPublicKey()</button>
+        <button id="relaysBtn" class="secondary" disabled>getRelays()</button>
+        <button id="clearTokensBtn" class="secondary" disabled>clearTokens()</button>
+      </div>
+      <div class="row" style="margin-top:8px;">
+        <div style="grid-column: 1 / -1;">
+          <label for="eventJson">Event JSON</label>
+          <textarea id="eventJson" class="mono">{"kind":1,"created_at":1710000000,"tags":[],"content":"hello from next","pubkey":""}</textarea>
+        </div>
+      </div>
+      <div class="row" style="margin-top:8px;">
+        <button id="signBtn" class="secondary" disabled>signEvent()</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Token state</h2>
+      <div id="tokenState" class="mono">null</div>
+    </section>
+
+    <section class="card">
+      <h2>Logs</h2>
+      <button id="clearLogsBtn" class="secondary">Clear logs</button>
+      <div id="logs" class="mono" style="margin-top:8px;"></div>
+    </section>
+  </div>
+
+  <script src="./dist/browser/sanctum-sdk.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let client = null;
+
+    const log = (message, data) => {
+      const ts = new Date().toISOString();
+      const details = data ? '\n' + JSON.stringify(data, null, 2) : '';
+      $('logs').textContent = `[${ts}] ${message}${details}\n\n` + $('logs').textContent;
+    };
+
+    const setApiEnabled = (enabled) => {
+      ['pubkeyBtn', 'relaysBtn', 'clearTokensBtn', 'signBtn'].forEach((id) => { $(id).disabled = !enabled; });
+    };
+
+    const refreshState = async () => {
+      if (!client) return;
+      const token = await client.session.getTokenData();
+      $('tokenState').textContent = JSON.stringify(token, null, 2) || 'null';
+      setApiEnabled(Boolean(token));
+    };
+
+    $('initBtn').addEventListener('click', async () => {
+      const url = $('url').value.trim();
+      const websocketUrl = $('wsUrl').value.trim() || undefined;
+      client = window.SanctumSDK.createSanctumSDK({ url, websocketUrl });
+      await client.init();
+      client.events.onTokenChange((token) => {
+        log('onTokenChange', token);
+        void refreshState();
+      });
+      client.events.onReauthRequired((ctx) => {
+        log('onReauthRequired', ctx);
+      });
+      client.events.onAuthStateChanged((state) => {
+        log('onAuthStateChanged', { state });
+      });
+      $('status').textContent = 'Initialized.';
+      $('mountWidgetBtn').disabled = false;
+      log('Client initialized', { url, websocketUrl });
+      await refreshState();
+    });
+
+    $('mountWidgetBtn').addEventListener('click', () => {
+      if (!client) return;
+      const host = $('widget-host');
+      host.innerHTML = '<div id="next-widget-root"></div>';
+      client.widget.mount({
+        containerId: 'next-widget-root',
+        theme: $('theme').value
+      });
+      $('unmountWidgetBtn').disabled = false;
+      log('Widget mounted');
+    });
+
+    $('unmountWidgetBtn').addEventListener('click', () => {
+      if (!client) return;
+      client.widget.unmount();
+      $('widget-host').innerHTML = '';
+      $('unmountWidgetBtn').disabled = true;
+      log('Widget unmounted');
+    });
+
+    $('pubkeyBtn').addEventListener('click', async () => {
+      try {
+        const pubkey = await client.api.getPublicKey();
+        log('getPublicKey success', { pubkey });
+      } catch (error) {
+        log('getPublicKey error', { message: error.message, code: error.code });
+      }
+    });
+
+    $('relaysBtn').addEventListener('click', async () => {
+      try {
+        const relays = await client.api.getRelays();
+        log('getRelays success', relays);
+      } catch (error) {
+        log('getRelays error', { message: error.message, code: error.code });
+      }
+    });
+
+    $('clearTokensBtn').addEventListener('click', async () => {
+      await client.api.clearTokens();
+      log('clearTokens success');
+      await refreshState();
+    });
+
+    $('signBtn').addEventListener('click', async () => {
+      try {
+        const signedEvent = await client.api.signEvent($('eventJson').value.trim());
+        log('signEvent success', { signedEvent });
+      } catch (error) {
+        log('signEvent error', { message: error.message, code: error.code });
+      }
+    });
+
+    $('clearLogsBtn').addEventListener('click', () => {
+      $('logs').textContent = '';
+    });
+  </script>
+</body>
+</html>

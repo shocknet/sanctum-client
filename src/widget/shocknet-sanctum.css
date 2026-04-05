@@ -1,0 +1,110 @@
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ *  SHOCKNET — SANCTUM  ·  Product Stylesheet
+ *  shocknet-sanctum.css  ·  v1.2
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ *  LOAD AFTER shocknet-global.css
+ *
+ *  Colors
+ *  ─────────────────────────────────────────────────────────────────────────
+ *  Single hue — both mark paths share the same color.
+ *  Emerald   dark #25E673   light #4FD27A
+ *
+ *  Mark orientation: FLIPPED vs all other products
+ *  (Path A is the lower arc, Path B is the upper arc in SANCTUM's SVG)
+ *
+ *  Product: Private encrypted communications on Lightning.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+
+/* ── Raw color variables ────────────────────────────────────────────────── */
+
+:root,
+[data-theme="dark"] {
+  --sa-a:    #25E673;   /* Emerald · Vault · Ground */
+  --sa-on:   #111213;
+}
+
+[data-theme="light"] {
+  --sa-a:    #4FD27A;
+  --sa-on:   #111213;
+}
+
+
+/* ── Semantic product tokens ────────────────────────────────────────────── */
+
+[data-product="sanctum"] {
+  --prod-a:        var(--sa-a);
+  --prod-b:        var(--sa-a);
+  --prod-on-a:     var(--sa-on);
+  --prod-on-b:     var(--sa-on);
+  --prod-gradient: var(--sa-a);
+}
+
+
+/* ── Buttons ────────────────────────────────────────────────────────────── */
+
+.btn-sa,
+.btn-sa-sm {
+  background: var(--sa-a);
+  color:      var(--sa-on);
+}
+.btn-sa:hover,
+.btn-sa-sm:hover { box-shadow: 0 0 20px rgba(37,230,115,.20); }
+
+.btn-sa-out {
+  background:    transparent;
+  border:        1px solid var(--sa-a);
+  color:         var(--sa-a);
+}
+.btn-sa-out:hover { box-shadow: 0 0 20px rgba(37,230,115,.20); }
+
+
+/* ── Pills ──────────────────────────────────────────────────────────────── */
+
+.pill-sa {
+  background:  color-mix(in srgb, var(--sa-a) 14%, transparent);
+  border:      1px solid var(--sa-a);
+  color:       var(--sa-a);
+}
+
+[data-theme="light"] .pill-sa { color: #2D9A55; border-color: #4FD27A; background: color-mix(in srgb, #4FD27A 14%, transparent); }
+
+
+/* ── Callout tint ───────────────────────────────────────────────────────── */
+
+.callout--sa {
+  background:   color-mix(in srgb, var(--sa-a) 6%,  transparent);
+  border-color: color-mix(in srgb, var(--sa-a) 18%, transparent);
+}
+
+
+/* ── Icon cell hover ────────────────────────────────────────────────────── */
+
+.icon-cell--sa:hover { background: color-mix(in srgb, var(--sa-a) 10%, transparent); }
+
+
+/* ── Form focus ─────────────────────────────────────────────────────────── */
+
+[data-product="sanctum"] input:focus,
+[data-product="sanctum"] textarea:focus,
+[data-product="sanctum"] select:focus {
+  border-color: var(--sa-a);
+  box-shadow:   0 0 0 2px color-mix(in srgb, var(--sa-a) 20%, transparent);
+}
+
+
+/* ── Product bar accent ─────────────────────────────────────────────────── */
+
+.product-bar--sa { background: var(--sa-a); }
+
+/* Widget inline icons — inherit Sanctum emerald from design tokens */
+[data-product="sanctum"] .sanctum-widget-icon {
+  color: var(--sa-a);
+}
+[data-product="sanctum"] .btn-ghost .sanctum-widget-icon {
+  color: var(--sa-a);
+}
