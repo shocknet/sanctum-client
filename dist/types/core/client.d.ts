@@ -1,2 +1,2 @@
-import type { SanctumSDKConfig, SanctumSDK } from '../types';
-export declare const createSanctumSDK: (config: SanctumSDKConfig) => SanctumSDK;
+import type { SanctumDKConfig, SanctumDK } from '../types';
+export declare const createSanctumDK: (config: SanctumDKConfig) => SanctumDK;

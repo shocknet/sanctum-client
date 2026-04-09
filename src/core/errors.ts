@@ -1,4 +1,4 @@
-import type { SanctumSdkErrorShape } from '../types';
+import type { SanctumDKErrorShape } from '../types';
 import { ErrorCode as ProtoErrorCode } from '../proto/types';
 
 export const ErrorCode = {
@@ -9,14 +9,14 @@ export const ErrorCode = {
   WIDGET_CONTAINER_NOT_FOUND: 'WIDGET_CONTAINER_NOT_FOUND'
 } as const;
 
-export class SanctumSdkError extends Error implements SanctumSdkErrorShape {
+export class SanctumDKError extends Error implements SanctumDKErrorShape {
   code: string;
   recoverable: boolean;
   cause?: unknown;
 
   constructor(message: string, code: string, recoverable = true, cause?: unknown) {
     super(message);
-    this.name = 'SanctumSdkError';
+    this.name = 'SanctumDKError';
     this.code = code;
     this.recoverable = recoverable;
     this.cause = cause;

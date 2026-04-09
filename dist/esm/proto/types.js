@@ -22,12 +22,6 @@ var ErrorCode$1;
     ErrorCode["INVALID_INPUT"] = "INVALID_INPUT";
     ErrorCode["UNKNOWN_ERROR"] = "UNKNOWN_ERROR";
 })(ErrorCode$1 || (ErrorCode$1 = {}));
-var GrantStatus;
-(function (GrantStatus) {
-    GrantStatus["ACTIVE"] = "ACTIVE";
-    GrantStatus["REVOKED"] = "REVOKED";
-    GrantStatus["EXPIRED"] = "EXPIRED";
-})(GrantStatus || (GrantStatus = {}));
 const Nip44DecryptResponseValidate = (o, opts = {}, path = 'Nip44DecryptResponse::root.') => {
     if (opts.checkOptionalsAreSet && opts.allOptionalsAreSet)
         return new Error(path + ': only one of checkOptionalsAreSet or allOptionalNonDefault can be set for each message');
@@ -170,5 +164,5 @@ const SocketErrorMessageValidate = (o, opts = {}, path = 'SocketErrorMessage::ro
     return null;
 };
 
-export { ErrorCode$1 as ErrorCode, GrantStatus, Nip44DecryptResponseValidate, Nip44EncryptResponseValidate, Nip98EventResponseValidate, NostrRelaysValidate, NostrSignResponseValidate, RelayPolicyValidate, SocketAuthRequestTokenValidate, SocketErrorMessageValidate, TokensDataValidate, UserNostrPubKeyValidate };
+export { ErrorCode$1 as ErrorCode, Nip44DecryptResponseValidate, Nip44EncryptResponseValidate, Nip98EventResponseValidate, NostrRelaysValidate, NostrSignResponseValidate, RelayPolicyValidate, SocketAuthRequestTokenValidate, SocketErrorMessageValidate, TokensDataValidate, UserNostrPubKeyValidate };
 //# sourceMappingURL=types.js.map

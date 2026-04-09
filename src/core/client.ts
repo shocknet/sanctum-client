@@ -1,4 +1,4 @@
-import type { SanctumSDKConfig, SanctumSDK, SanctumSDKEvents, SessionApi } from '../types';
+import type { SanctumDKConfig, SanctumDK, SanctumDKEvents, SessionApi, TokensData } from '../types';
 import { TypedEventBus } from './events';
 import { getDefaultStorageAdapter } from '../storage/defaultStorage';
 import { createStorageTokenDataAdapter } from '../storage/tokenStore';
@@ -19,7 +19,7 @@ const assertUrl = (name: string, value: string): void => {
   }
 };
 
-export const createSanctumSDK = (config: SanctumSDKConfig): SanctumSDK => {
+export const createSanctumDK = (config: SanctumDKConfig): SanctumDK => {
   assertUrl('url', config.url);
   const websocketUrl = config.websocketUrl ?? deriveWebsocketUrl(config.url);
   assertUrl('websocketUrl', websocketUrl);
@@ -44,7 +44,7 @@ export const createSanctumSDK = (config: SanctumSDKConfig): SanctumSDK => {
     clientKeyStore
   });
 
-  const eventApi: SanctumSDKEvents = {
+  const eventApi: SanctumDKEvents = {
     onTokenChange: (handler) => events.on('tokenChange', handler),
     onTokensUpdated: (handler) => events.on('tokensUpdated', handler),
     onReauthRequired: (handler) => events.on('reauthRequired', handler),
@@ -53,6 +53,7 @@ export const createSanctumSDK = (config: SanctumSDKConfig): SanctumSDK => {
 
   const sessionApi: SessionApi = {
     getTokenData: () => session.getTokenData(),
+    setTokenData: (tokensData: TokensData) => session.setTokenData(tokensData),
     clear: () => session.clear()
   };
 
@@ -65,14 +66,8 @@ export const createSanctumSDK = (config: SanctumSDKConfig): SanctumSDK => {
     },
     session: sessionApi,
     events: eventApi,
-    async init() {
-      const token = await session.getTokenData();
-      events.emit('tokenChange', token);
-      events.emit('authStateChanged', token ? 'authenticated' : 'idle');
-    },
     async destroy() {
       widgetController.destroy();
-      await session.clear();
       events.clear();
     }
   };

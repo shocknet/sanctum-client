@@ -1,12 +1,12 @@
-import { createSanctumSDK } from './core/client';
+import { createSanctumDK } from './core/client';
 
-export { createSanctumSDK };
-export { SanctumSdkError, ErrorCode } from './core/errors';
+export { createSanctumDK };
+export { SanctumDKError, ErrorCode } from './core/errors';
 export type {
   AuthState,
-  SanctumSDKConfig,
-  SanctumSDKEvents,
-  SanctumSDK,
+  SanctumDKConfig,
+  SanctumDKEvents,
+  SanctumDK,
   SanctumApi,
   SanctumStorageAdapter,
   SessionApi,
@@ -18,14 +18,14 @@ export type {
 
 declare global {
   interface Window {
-    SanctumSDK?: {
-      createSanctumSDK: typeof createSanctumSDK;
+    SanctumDK?: {
+      createSanctumDK: typeof createSanctumDK;
     };
   }
 }
 
 if (typeof window !== 'undefined') {
-  window.SanctumSDK = {
-    createSanctumSDK
+  window.SanctumDK = {
+    createSanctumDK
   };
 }

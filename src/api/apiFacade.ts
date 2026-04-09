@@ -1,4 +1,4 @@
-import { ErrorCode, SanctumSdkError, isReauthReason } from '../core/errors';
+import { ErrorCode, SanctumDKError, isReauthReason } from '../core/errors';
 import type { TypedEventBus } from '../core/events';
 import type { SessionManager } from '../session/sessionManager';
 import type { ClientKeyStore } from '../storage/clientKeyStore';
@@ -40,18 +40,11 @@ export class ApiFacade implements SanctumApi {
     });
   }
 
-  async getTokenData() {
-    return this.deps.session.getTokenData();
-  }
-
-  async clearTokens(): Promise<void> {
-    await this.deps.session.clear();
-  }
 
   private async requireAuth(): Promise<Types.TokensData> {
     const tokenData = await this.deps.session.getTokenData();
     if (!tokenData) {
-      throw new SanctumSdkError('Not authenticated', ErrorCode.NOT_AUTHENTICATED, false);
+      throw new SanctumDKError('Not authenticated', ErrorCode.NOT_AUTHENTICATED, false);
     }
     if (Date.now() >= tokenData.refresh_expires_at) {
       return this.requireReauth(ErrorCode.REFRESH_TOKEN_EXPIRED);
@@ -65,7 +58,7 @@ export class ApiFacade implements SanctumApi {
   private async requireReauth(reason: string): Promise<never> {
     await this.deps.session.clear();
     this.deps.events.emit('reauthRequired', { reason });
-    throw new SanctumSdkError('Re-authentication required', reason, false);
+    throw new SanctumDKError('Re-authentication required', reason, false);
   }
 
   private isRefreshableAuthError(reason: string): boolean {
@@ -88,7 +81,7 @@ export class ApiFacade implements SanctumApi {
         if (isReauthReason(refresh.reason)) {
           return this.requireReauth(refresh.reason);
         }
-        throw new SanctumSdkError(refresh.reason, refresh.reason);
+        throw new SanctumDKError(refresh.reason, refresh.reason);
       }
       await this.deps.session.updateTokensAfterRefresh(refresh);
       return refresh;
@@ -107,14 +100,14 @@ export class ApiFacade implements SanctumApi {
       const { status: _status, ...payload } = await result;
       return payload as T;
     }
-    throw new SanctumSdkError(result.reason, result.reason);
+    throw new SanctumDKError(result.reason, result.reason);
   }
 
   private async withRefreshRetry<T extends object>(fn: () => Promise<Types.ResultError | ({ status: 'OK' } & T)>): Promise<T> {
     try {
       return await this.unwrapResult<T>(fn());
     } catch (error) {
-      if (!(error instanceof SanctumSdkError)) {
+      if (!(error instanceof SanctumDKError)) {
         throw error;
       }
       if (error.code === ErrorCode.GRANT_REVOKED) {

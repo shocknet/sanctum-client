@@ -19,7 +19,7 @@ export interface TokenDataAdapter {
   clearTokenData(): MaybePromise<void>;
 }
 
-export interface SanctumSDKConfig {
+export interface SanctumDKConfig {
   url: string;
   websocketUrl?: string;
   storageAdapter?: SanctumStorageAdapter;
@@ -30,7 +30,7 @@ export interface SanctumSDKConfig {
   getClientKey?: () => MaybePromise<string>;
 }
 
-export interface SanctumSdkErrorShape {
+export interface SanctumDKErrorShape {
   code: string;
   recoverable: boolean;
 }
@@ -44,8 +44,6 @@ export interface SanctumApi {
   encrypt(plaintext: string, pubkey: string): Promise<string>;
   decrypt(ciphertext: string, pubkey: string): Promise<string>;
   createAuthHeader(url: string, method: string, body?: string): Promise<string>;
-  getTokenData(): Promise<TokensData | null>;
-  clearTokens(): Promise<void>;
 }
 
 export interface WidgetMountOptions {
@@ -64,21 +62,21 @@ export interface SanctumWidgetApi {
 
 export interface SessionApi {
   getTokenData(): Promise<TokensData | null>;
+  setTokenData(tokensData: TokensData): Promise<void>;
   clear(): Promise<void>;
 }
 
-export interface SanctumSDKEvents {
+export interface SanctumDKEvents {
   onTokensUpdated(handler: (tokens: TokensData) => void): () => void;
   onTokenChange(handler: (tokens: TokensData | null) => void): () => void;
   onReauthRequired(handler: (context: ReauthContext) => void): () => void;
   onAuthStateChanged(handler: (state: AuthState) => void): () => void;
 }
 
-export interface SanctumSDK {
+export interface SanctumDK {
   api: SanctumApi;
   widget: SanctumWidgetApi;
   session: SessionApi;
-  events: SanctumSDKEvents;
-  init(): Promise<void>;
+  events: SanctumDKEvents;
   destroy(): Promise<void>;
 }

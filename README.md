@@ -1,30 +1,37 @@
-# SanctumSDK
+# SanctumDK
 
-Instance-based Sanctum browser SDK designed for predictable lifecycle behavior and stronger developer ergonomics.
+Instance-based Sanctum browser SDK (SanctumDK) designed for predictable lifecycle behavior and stronger developer ergonomics.
 
 ## Design Goals
 
 - No global mutable runtime state
-- Explicit client lifecycle (`init`, `destroy`)
+- Explicit client lifecycle (`destroy`)
 - Typed event subscriptions (no global callback overwrite)
 - Single-flight token refresh with deterministic reauth handling
 - Closed-shadow widget boundary (host apps cannot style or inspect internals)
 
+## Install
+
+```bash
+npm install sanctum-dk
+```
 
 ## Quick Start
 
 ```ts
-import { createSanctumSDK } from 'sanctum-sdk';
+import { createSanctumDK } from 'sanctum-dk';
 
-const client = createSanctumSDK({
+const client = createSanctumDK({
   url: 'https://auth.shock.network',
   websocketUrl: 'wss://auth.shock.network'
 });
 
-await client.init();
-
 const offToken = client.events.onTokenChange((token) => {
   console.log('Token changed', token);
+});
+
+const offAuthState = client.events.onAuthStateChanged((state) => {
+  console.log('Auth state', state);
 });
 
 client.widget.mount({
@@ -36,12 +43,13 @@ const pubkey = await client.api.getPublicKey();
 console.log(pubkey);
 
 offToken();
+offAuthState();
 await client.destroy();
 ```
 
 ## API Surface
 
-### `createSanctumSDK(config)`
+### `createSanctumDK(config)`
 
 Creates an isolated client instance. Multiple instances can exist without sharing state.
 
@@ -51,21 +59,26 @@ Config:
 - `websocketUrl` (optional, derived from `url` if omitted)
 - `storageAdapter` (optional)
 - `tokenDataAdapter` (optional)
+- `getClientKey` (optional)
 
 ### `client.api`
 
 - `getPublicKey()`
 - `getRelays()`
-- `signEvent(eventJson)`
+- `signEvent(eventJsonString)`
 - `encrypt(plaintext, pubkey)`
 - `decrypt(ciphertext, pubkey)`
 - `createAuthHeader(url, method, body?)`
+
+### `client.session`
+
 - `getTokenData()`
-- `clearTokens()`
+- `setTokenData(tokensData)`
+- `clear()`
 
 ### `client.widget`
 
-- `mount({ containerId, theme?, openAuthWindow? })`
+- `mount({ containerId, theme?, openAuthWindow?, showLogoutButton? })`
 - `setTheme(theme)`
 - `unmount()`
 
@@ -75,10 +88,26 @@ Widget internals run inside a **closed shadow root** and are intentionally not c
 
 - `onTokenChange(handler)`
 - `onTokensUpdated(handler)`
-- `onReauthRequired(handler)`
+- `onReauthRequired(({ reason }) => ...)`
 - `onAuthStateChanged(handler)`
 
 All event APIs return `unsubscribe`.
+
+### Errors
+
+- `SanctumDKError`
+- `ErrorCode`
+
+Most API methods throw `SanctumDKError` on failure.
+
+## Lifecycle notes
+
+- `createSanctumDK(...)` is synchronous wiring (no network calls).
+- `client.widget.mount(...)` attaches DOM listeners, starts the widget auth flow when the user clicks connect, and updates UI based on session/events.
+- `client.destroy()` is the instance-level teardown:
+  - unmounts/destroys the widget (future `widget.mount(...)` on the same instance will throw)
+  - clears all event handlers registered through `client.events`
+  - does **not** clear persisted tokens/session storage (use `client.session.clear()` for logout)
 
 ## Reauth Behavior
 
@@ -93,11 +122,12 @@ Reauth path:
 
 1. token storage cleared
 2. `onReauthRequired` emitted
-3. API call throws `SanctumSdkError` with `recoverable=false`
+3. API call throws `SanctumDKError` with `recoverable=false`
 
 ## Development
 
 ```bash
+npm install
 npm run build
 npm run test
 npm run serve

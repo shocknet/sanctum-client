@@ -15,18 +15,6 @@ export type ClientParams = {
     checkResult?: true
 }
 export default (params: ClientParams) => ({
-    Health: async (): Promise<ResultError | ({ status: 'OK' })> => {
-        const auth = await params.retrieveGuestAuth()
-        if (auth === null) throw new Error('retrieveGuestAuth() returned null')
-        let finalRoute = '/api/health'
-        const { data } = await fetchAdapter.get(params.baseUrl + finalRoute, { headers: { 'authorization': auth } })
-        if (data.status === 'ERROR' && typeof data.reason === 'string') return data
-        if (data.status === 'OK') { 
-            return data
-        }
-        return { status: 'ERROR', reason: 'invalid response' }
-    },
-    
     GetNostrPubKey: async (): Promise<ResultError | ({ status: 'OK' }& Types.UserNostrPubKey)> => {
         const auth = await params.retrieveAccessTokenAuth()
         if (auth === null) throw new Error('retrieveAccessTokenAuth() returned null')

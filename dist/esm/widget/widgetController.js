@@ -1,4 +1,4 @@
-import { SanctumSdkError, ErrorCode } from '../core/errors.js';
+import { SanctumDKError, ErrorCode } from '../core/errors.js';
 import { AuthSocketClient, AUTH_SOCKET_CANCELLED_MESSAGE } from './authSocketClient.js';
 import { settingsIcon, hourglassIcon, checkMarkIcon, logoutIcon } from './icons.js';
 import img from './SANCTUM_dark.svg.js';
@@ -89,11 +89,11 @@ class WidgetController {
     }
     mount(options) {
         if (this.destroyed) {
-            throw new SanctumSdkError('Client already destroyed', ErrorCode.ALREADY_DESTROYED, false);
+            throw new SanctumDKError('Client already destroyed', ErrorCode.ALREADY_DESTROYED, false);
         }
         const container = document.getElementById(options.containerId);
         if (!container) {
-            throw new SanctumSdkError(`Container "${options.containerId}" not found`, ErrorCode.WIDGET_CONTAINER_NOT_FOUND, false);
+            throw new SanctumDKError(`Container "${options.containerId}" not found`, ErrorCode.WIDGET_CONTAINER_NOT_FOUND, false);
         }
         if (this.mounted) {
             this.unmount();

@@ -1,4 +1,4 @@
-import type { SanctumSdkErrorShape } from '../types';
+import type { SanctumDKErrorShape } from '../types';
 import { ErrorCode as ProtoErrorCode } from '../proto/types';
 export declare const ErrorCode: {
     readonly NOT_AUTHENTICATED: "NOT_AUTHENTICATED";
@@ -26,7 +26,7 @@ export declare const ErrorCode: {
     readonly INVALID_INPUT: ProtoErrorCode.INVALID_INPUT;
     readonly UNKNOWN_ERROR: ProtoErrorCode.UNKNOWN_ERROR;
 };
-export declare class SanctumSdkError extends Error implements SanctumSdkErrorShape {
+export declare class SanctumDKError extends Error implements SanctumDKErrorShape {
     code: string;
     recoverable: boolean;
     cause?: unknown;

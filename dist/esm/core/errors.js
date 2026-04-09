@@ -7,10 +7,10 @@ const ErrorCode = {
     ALREADY_DESTROYED: 'ALREADY_DESTROYED',
     WIDGET_CONTAINER_NOT_FOUND: 'WIDGET_CONTAINER_NOT_FOUND'
 };
-class SanctumSdkError extends Error {
+class SanctumDKError extends Error {
     constructor(message, code, recoverable = true, cause) {
         super(message);
-        this.name = 'SanctumSdkError';
+        this.name = 'SanctumDKError';
         this.code = code;
         this.recoverable = recoverable;
         this.cause = cause;
@@ -23,5 +23,5 @@ const isReauthReason = (reason) => {
         || reason === ErrorCode.GRANT_REVOKED;
 };
 
-export { ErrorCode, SanctumSdkError, isReauthReason };
+export { ErrorCode, SanctumDKError, isReauthReason };
 //# sourceMappingURL=errors.js.map

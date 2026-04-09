@@ -2,7 +2,6 @@ import type { TypedEventBus } from '../core/events';
 import type { SessionManager } from '../session/sessionManager';
 import type { ClientKeyStore } from '../storage/clientKeyStore';
 import type { SanctumApi } from '../types';
-import * as Types from '../proto/types';
 type ApiFacadeDeps = {
     baseUrl: string;
     session: SessionManager;
@@ -14,8 +13,6 @@ export declare class ApiFacade implements SanctumApi {
     private refreshPromise;
     private readonly client;
     constructor(deps: ApiFacadeDeps);
-    getTokenData(): Promise<Types.TokensData | null>;
-    clearTokens(): Promise<void>;
     private requireAuth;
     private requireReauth;
     private isRefreshableAuthError;

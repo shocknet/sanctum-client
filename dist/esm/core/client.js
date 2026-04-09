@@ -17,7 +17,7 @@ const assertUrl = (name, value) => {
         throw new Error(`${name} is not a valid URL: ${value}`);
     }
 };
-const createSanctumSDK = (config) => {
+const createSanctumDK = (config) => {
     assertUrl('url', config.url);
     const websocketUrl = config.websocketUrl ?? deriveWebsocketUrl(config.url);
     assertUrl('websocketUrl', websocketUrl);
@@ -47,6 +47,7 @@ const createSanctumSDK = (config) => {
     };
     const sessionApi = {
         getTokenData: () => session.getTokenData(),
+        setTokenData: (tokensData) => session.setTokenData(tokensData),
         clear: () => session.clear()
     };
     return {
@@ -58,18 +59,12 @@ const createSanctumSDK = (config) => {
         },
         session: sessionApi,
         events: eventApi,
-        async init() {
-            const token = await session.getTokenData();
-            events.emit('tokenChange', token);
-            events.emit('authStateChanged', token ? 'authenticated' : 'idle');
-        },
         async destroy() {
             widgetController.destroy();
-            await session.clear();
             events.clear();
         }
     };
 };
 
-export { createSanctumSDK };
+export { createSanctumDK };
 //# sourceMappingURL=client.js.map

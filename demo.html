@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SanctumSDK Demo</title>
+  <title>SanctumDK Demo</title>
   <style>
     :root { --bg: #0f1520; --panel: #1a2432; --border: #2b3a4d; --text: #e8f0fb; --muted: #9fb1c7; --brand: #3c8fff; }
     html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); max-width: 100%; overflow-x: hidden; }
@@ -27,12 +27,12 @@
 <body>
   <div class="wrap">
     <section class="card">
-      <h1>SanctumSDK</h1>
+      <h1>SanctumDK</h1>
       <h2>Instance-based SDK demo</h2>
     </section>
 
     <section class="card">
-      <h2>1) Create and initialize client</h2>
+      <h2>1) Create client</h2>
       <div class="row">
         <div>
           <label for="url">URL</label>
@@ -44,9 +44,9 @@
         </div>
       </div>
       <div class="row" style="margin-top: 8px;">
-        <button id="initBtn">Create Client + init()</button>
+        <button id="initBtn">Create Client</button>
       </div>
-      <div id="status" style="margin-top:8px; color: var(--muted);">Not initialized.</div>
+      <div id="status" style="margin-top:8px; color: var(--muted);">Not created.</div>
     </section>
 
     <section class="card">
@@ -73,7 +73,7 @@
       <div class="row">
         <button id="pubkeyBtn" class="secondary" disabled>getPublicKey()</button>
         <button id="relaysBtn" class="secondary" disabled>getRelays()</button>
-        <button id="clearTokensBtn" class="secondary" disabled>clearTokens()</button>
+        <button id="clearTokensBtn" class="secondary" disabled>session.clear()</button>
       </div>
       <div class="row" style="margin-top:8px;">
         <div style="grid-column: 1 / -1;">
@@ -98,7 +98,7 @@
     </section>
   </div>
 
-  <script src="./dist/browser/sanctum-sdk.js"></script>
+  <script src="./dist/browser/sanctum-dk.js"></script>
   <script>
     const $ = (id) => document.getElementById(id);
     let client = null;
@@ -123,8 +123,7 @@
     $('initBtn').addEventListener('click', async () => {
       const url = $('url').value.trim();
       const websocketUrl = $('wsUrl').value.trim() || undefined;
-      client = window.SanctumSDK.createSanctumSDK({ url, websocketUrl });
-      await client.init();
+      client = window.SanctumDK.createSanctumDK({ url, websocketUrl });
       client.events.onTokenChange((token) => {
         log('onTokenChange', token);
         void refreshState();
@@ -135,9 +134,9 @@
       client.events.onAuthStateChanged((state) => {
         log('onAuthStateChanged', { state });
       });
-      $('status').textContent = 'Initialized.';
+      $('status').textContent = 'Created.';
       $('mountWidgetBtn').disabled = false;
-      log('Client initialized', { url, websocketUrl });
+      log('Client created', { url, websocketUrl });
       await refreshState();
     });
 
@@ -180,8 +179,8 @@
     });
 
     $('clearTokensBtn').addEventListener('click', async () => {
-      await client.api.clearTokens();
-      log('clearTokens success');
+      await client.session.clear();
+      log('session.clear success');
       await refreshState();
     });
 

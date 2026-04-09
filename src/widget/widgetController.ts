@@ -1,5 +1,5 @@
 import type { AuthState, TokensData, WidgetMountOptions, WidgetTheme } from '../types';
-import { ErrorCode, SanctumSdkError } from '../core/errors';
+import { ErrorCode, SanctumDKError } from '../core/errors';
 import type { SessionManager } from '../session/sessionManager';
 import type { TypedEventBus } from '../core/events';
 import type { ClientKeyStore } from '../storage/clientKeyStore';
@@ -78,11 +78,11 @@ export class WidgetController {
 
   mount(options: WidgetMountOptions): void {
     if (this.destroyed) {
-      throw new SanctumSdkError('Client already destroyed', ErrorCode.ALREADY_DESTROYED, false);
+      throw new SanctumDKError('Client already destroyed', ErrorCode.ALREADY_DESTROYED, false);
     }
     const container = document.getElementById(options.containerId);
     if (!container) {
-      throw new SanctumSdkError(
+      throw new SanctumDKError(
         `Container "${options.containerId}" not found`,
         ErrorCode.WIDGET_CONTAINER_NOT_FOUND,
         false

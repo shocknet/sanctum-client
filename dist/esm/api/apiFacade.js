@@ -1,4 +1,4 @@
-import { SanctumSdkError, ErrorCode, isReauthReason } from '../core/errors.js';
+import { SanctumDKError, ErrorCode, isReauthReason } from '../core/errors.js';
 import httpClient from '../proto/http_client.js';
 
 const ACCESS_TOKEN_REFRESH_SKEW_MS = 60000;
@@ -24,16 +24,10 @@ class ApiFacade {
             deviceId: '',
         });
     }
-    async getTokenData() {
-        return this.deps.session.getTokenData();
-    }
-    async clearTokens() {
-        await this.deps.session.clear();
-    }
     async requireAuth() {
         const tokenData = await this.deps.session.getTokenData();
         if (!tokenData) {
-            throw new SanctumSdkError('Not authenticated', ErrorCode.NOT_AUTHENTICATED, false);
+            throw new SanctumDKError('Not authenticated', ErrorCode.NOT_AUTHENTICATED, false);
         }
         if (Date.now() >= tokenData.refresh_expires_at) {
             return this.requireReauth(ErrorCode.REFRESH_TOKEN_EXPIRED);
@@ -46,7 +40,7 @@ class ApiFacade {
     async requireReauth(reason) {
         await this.deps.session.clear();
         this.deps.events.emit('reauthRequired', { reason });
-        throw new SanctumSdkError('Re-authentication required', reason, false);
+        throw new SanctumDKError('Re-authentication required', reason, false);
     }
     isRefreshableAuthError(reason) {
         return reason === ErrorCode.ACCESS_TOKEN_EXPIRED || reason === ErrorCode.ACCESS_TOKEN_INVALID;
@@ -67,7 +61,7 @@ class ApiFacade {
                 if (isReauthReason(refresh.reason)) {
                     return this.requireReauth(refresh.reason);
                 }
-                throw new SanctumSdkError(refresh.reason, refresh.reason);
+                throw new SanctumDKError(refresh.reason, refresh.reason);
             }
             await this.deps.session.updateTokensAfterRefresh(refresh);
             return refresh;
@@ -85,14 +79,14 @@ class ApiFacade {
             const { status: _status, ...payload } = await result;
             return payload;
         }
-        throw new SanctumSdkError(result.reason, result.reason);
+        throw new SanctumDKError(result.reason, result.reason);
     }
     async withRefreshRetry(fn) {
         try {
             return await this.unwrapResult(fn());
         }
         catch (error) {
-            if (!(error instanceof SanctumSdkError)) {
+            if (!(error instanceof SanctumDKError)) {
                 throw error;
             }
             if (error.code === ErrorCode.GRANT_REVOKED) {

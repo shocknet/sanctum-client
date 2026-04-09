@@ -14,7 +14,7 @@ export default defineConfig((commandLineArgs) => {
       {
         file: 'dist/browser/sanctum-sdk.js',
         format: 'iife',
-        name: 'SanctumSDK',
+        name: 'SanctumDK',
         sourcemap: true,
         plugins: isProd ? [terser()] : []
       },

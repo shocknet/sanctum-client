@@ -1,11 +1,11 @@
-import { createSanctumSDK } from './core/client.js';
-export { ErrorCode, SanctumSdkError } from './core/errors.js';
+import { createSanctumDK } from './core/client.js';
+export { ErrorCode, SanctumDKError } from './core/errors.js';
 
 if (typeof window !== 'undefined') {
-    window.SanctumSDK = {
-        createSanctumSDK
+    window.SanctumDK = {
+        createSanctumDK
     };
 }
 
-export { createSanctumSDK };
+export { createSanctumDK };
 //# sourceMappingURL=index.js.map
