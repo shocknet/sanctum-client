@@ -15,9 +15,6 @@ export type ClientParams = {
     checkResult?: true;
 };
 declare const _default: (params: ClientParams) => {
-    Health: () => Promise<ResultError | ({
-        status: "OK";
-    })>;
     GetNostrPubKey: () => Promise<ResultError | ({
         status: "OK";
     } & Types.UserNostrPubKey)>;
