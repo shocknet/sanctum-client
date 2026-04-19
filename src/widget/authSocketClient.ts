@@ -47,6 +47,8 @@ export class AuthSocketClient {
   private reconnectTimer: number | null = null;
   private reconnectAttempts = 0;
   private aborted = false;
+  /** Last request_token from the server; sent on hello after reconnect so the backend can resume. */
+  private lastRequestToken: string | null = null;
 
   constructor(options: AuthSocketOptions) {
     this.url = options.url;
@@ -63,6 +65,7 @@ export class AuthSocketClient {
     if (this.socketPromise) return this.socketPromise;
     this.aborted = false;
     this.reconnectAttempts = 0;
+    this.lastRequestToken = null;
 
     this.socketPromise = new Promise<TokensData>((resolve, reject) => {
       this.resolveStart = resolve;
@@ -81,6 +84,7 @@ export class AuthSocketClient {
   abort(): void {
     if (this.aborted) return;
     this.aborted = true;
+    this.lastRequestToken = null;
     this.clearTimers();
     this.cleanupSocket();
     const reject = this.rejectStart;
@@ -133,10 +137,12 @@ export class AuthSocketClient {
         return;
       }
       if ('request_token' in parsed) {
+        this.lastRequestToken = parsed.request_token;
         this.onRequestToken?.(parsed);
         return;
       }
       if ('access_token' in parsed && 'refresh_token' in parsed) {
+        this.lastRequestToken = null;
         const resolve = this.resolveStart;
         this.cleanupSocket();
         resolve?.(parsed);
@@ -184,7 +190,8 @@ export class AuthSocketClient {
     try {
       const hello: SocketClientHello = {
         client_key: await this.getClientKey(),
-        protocol_version: SOCKET_PROTOCOL_VERSION
+        protocol_version: SOCKET_PROTOCOL_VERSION,
+        request_token: this.lastRequestToken ?? undefined,
       };
       this.socket.send(JSON.stringify(hello));
     } catch {

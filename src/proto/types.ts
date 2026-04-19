@@ -255,12 +255,15 @@ export const SocketAuthRequestTokenValidate = (o?: SocketAuthRequestToken, opts:
 export type SocketClientHello = {
     client_key: string
     protocol_version: number
+    request_token?: string
 }
-export const SocketClientHelloOptionalFields: [] = []
+export type SocketClientHelloOptionalField = 'request_token'
+export const SocketClientHelloOptionalFields: SocketClientHelloOptionalField[] = ['request_token']
 export type SocketClientHelloOptions = OptionsBaseMessage & {
-    checkOptionalsAreSet?: []
-    client_key_CustomCheck?: (v: string) => boolean
+    checkOptionalsAreSet?: SocketClientHelloOptionalField[]
     protocol_version_CustomCheck?: (v: number) => boolean
+    request_token_CustomCheck?: (v?: string) => boolean
+    client_key_CustomCheck?: (v: string) => boolean
 }
 export const SocketClientHelloValidate = (o?: SocketClientHello, opts: SocketClientHelloOptions = {}, path: string = 'SocketClientHello::root.'): Error | null => {
     if (opts.checkOptionalsAreSet && opts.allOptionalsAreSet) return new Error(path + ': only one of checkOptionalsAreSet or allOptionalNonDefault can be set for each message')
@@ -271,6 +274,9 @@ export const SocketClientHelloValidate = (o?: SocketClientHello, opts: SocketCli
 
     if (typeof o.protocol_version !== 'number') return new Error(`${path}.protocol_version: is not a number`)
     if (opts.protocol_version_CustomCheck && !opts.protocol_version_CustomCheck(o.protocol_version)) return new Error(`${path}.protocol_version: custom check failed`)
+
+    if ((o.request_token || opts.allOptionalsAreSet || opts.checkOptionalsAreSet?.includes('request_token')) && typeof o.request_token !== 'string') return new Error(`${path}.request_token: is not a string`)
+    if (opts.request_token_CustomCheck && !opts.request_token_CustomCheck(o.request_token)) return new Error(`${path}.request_token: custom check failed`)
 
     return null
 }

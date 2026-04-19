@@ -660,6 +660,8 @@ class AuthSocketClient {
         this.reconnectTimer = null;
         this.reconnectAttempts = 0;
         this.aborted = false;
+        /** Last request_token from the server; sent on hello after reconnect so the backend can resume. */
+        this.lastRequestToken = null;
         this.url = options.url;
         this.getClientKey = options.getClientKey;
         this.onState = options.onState;
@@ -674,6 +676,7 @@ class AuthSocketClient {
             return this.socketPromise;
         this.aborted = false;
         this.reconnectAttempts = 0;
+        this.lastRequestToken = null;
         this.socketPromise = new Promise((resolve, reject) => {
             this.resolveStart = resolve;
             this.rejectStart = reject;
@@ -690,6 +693,7 @@ class AuthSocketClient {
         if (this.aborted)
             return;
         this.aborted = true;
+        this.lastRequestToken = null;
         this.clearTimers();
         this.cleanupSocket();
         const reject = this.rejectStart;
@@ -740,10 +744,12 @@ class AuthSocketClient {
                 return;
             }
             if ('request_token' in parsed) {
+                this.lastRequestToken = parsed.request_token;
                 this.onRequestToken?.(parsed);
                 return;
             }
             if ('access_token' in parsed && 'refresh_token' in parsed) {
+                this.lastRequestToken = null;
                 const resolve = this.resolveStart;
                 this.cleanupSocket();
                 resolve?.(parsed);
@@ -785,7 +791,8 @@ class AuthSocketClient {
         try {
             const hello = {
                 client_key: await this.getClientKey(),
-                protocol_version: SOCKET_PROTOCOL_VERSION
+                protocol_version: SOCKET_PROTOCOL_VERSION,
+                request_token: this.lastRequestToken ?? undefined,
             };
             this.socket.send(JSON.stringify(hello));
         }

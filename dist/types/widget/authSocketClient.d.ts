@@ -29,6 +29,8 @@ export declare class AuthSocketClient {
     private reconnectTimer;
     private reconnectAttempts;
     private aborted;
+    /** Last request_token from the server; sent on hello after reconnect so the backend can resume. */
+    private lastRequestToken;
     constructor(options: AuthSocketOptions);
     start(): Promise<TokensData>;
     abort(): void;

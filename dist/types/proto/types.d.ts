@@ -228,12 +228,15 @@ export declare const SocketAuthRequestTokenValidate: (o?: SocketAuthRequestToken
 export type SocketClientHello = {
     client_key: string;
     protocol_version: number;
+    request_token?: string;
 };
-export declare const SocketClientHelloOptionalFields: [];
+export type SocketClientHelloOptionalField = 'request_token';
+export declare const SocketClientHelloOptionalFields: SocketClientHelloOptionalField[];
 export type SocketClientHelloOptions = OptionsBaseMessage & {
-    checkOptionalsAreSet?: [];
-    client_key_CustomCheck?: (v: string) => boolean;
+    checkOptionalsAreSet?: SocketClientHelloOptionalField[];
     protocol_version_CustomCheck?: (v: number) => boolean;
+    request_token_CustomCheck?: (v?: string) => boolean;
+    client_key_CustomCheck?: (v: string) => boolean;
 };
 export declare const SocketClientHelloValidate: (o?: SocketClientHello, opts?: SocketClientHelloOptions, path?: string) => Error | null;
 export type Empty = {};
