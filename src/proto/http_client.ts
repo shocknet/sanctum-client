@@ -5,9 +5,10 @@ export type ResultError = { status: 'ERROR', reason: string }
 
 export type ClientParams = {
     baseUrl: string
-    retrieveGuestAuth: () => Promise<string | null>
-    retrieveLegacyAccessTokenAuth: () => Promise<string | null>
     retrieveAccessTokenAuth: () => Promise<string | null>
+    retrieveGuestAuth: () => Promise<string | null>
+    retrieveGuestSensitiveAuth: () => Promise<string | null>
+    retrieveLegacyAccessTokenAuth: () => Promise<string | null>
     retrieveUserAuth: () => Promise<string | null>
     encryptCallback: (plain: any) => Promise<any>
     decryptCallback: (encrypted: any) => Promise<any>
@@ -28,6 +29,24 @@ export default (params: ClientParams) => ({
             if (error === null) { return { status: 'OK', ...result } } else return { status: 'ERROR', reason: error.message }
         }
         return { status: 'ERROR', reason: 'invalid response' }
+    },
+    AuthSocket: async (request: Types.AuthSocketClientHello, cb: (v:ResultError | ({ status: 'OK' }& Types.AuthSocketResponse)) => void, abort?: AbortSignal, ws?: { onOpen?: () => void, onClose?: () => void }): Promise<{ close: () => void }> => { 
+        let finalRoute = '/socket/auth'
+        const auth = await params.retrieveGuestSensitiveAuth()
+        if (auth === null) throw new Error('retrieveGuestSensitiveAuth() returned null')
+        const socket = new WebSocket(params.baseUrl + finalRoute)
+        let closedByClient = false
+        abort?.addEventListener('abort', () => { closedByClient = true; socket.close() })
+        socket.addEventListener('close', () => { if (!closedByClient) ws?.onClose?.() })
+        socket.addEventListener('open', () => {
+            ws?.onOpen?.()
+            socket.send(JSON.stringify({ body:request, _authorization: auth }))
+        })
+        socket.addEventListener('message', (event) => {
+            const data = JSON.parse(event.data) as ResultError | ({ status: 'OK' }& Types.AuthSocketResponse)
+            cb(data)
+        })
+		return { close: () => { closedByClient = true; socket.close() } }
     },
     GetNostrRelays: async (): Promise<ResultError | ({ status: 'OK' }& Types.NostrRelays)> => {
         const auth = await params.retrieveAccessTokenAuth()

@@ -229,43 +229,43 @@ export const MintFromRefreshTokenRequestValidate = (o?: MintFromRefreshTokenRequ
     return null
 }
 
-export type SocketAuthRequestToken = {
-    request_token: string
+export type AuthSocketAuthRequestTokenResponse = {
     expires_at: number
+    request_token: string
 }
-export const SocketAuthRequestTokenOptionalFields: [] = []
-export type SocketAuthRequestTokenOptions = OptionsBaseMessage & {
+export const AuthSocketAuthRequestTokenResponseOptionalFields: [] = []
+export type AuthSocketAuthRequestTokenResponseOptions = OptionsBaseMessage & {
     checkOptionalsAreSet?: []
-    request_token_CustomCheck?: (v: string) => boolean
     expires_at_CustomCheck?: (v: number) => boolean
+    request_token_CustomCheck?: (v: string) => boolean
 }
-export const SocketAuthRequestTokenValidate = (o?: SocketAuthRequestToken, opts: SocketAuthRequestTokenOptions = {}, path: string = 'SocketAuthRequestToken::root.'): Error | null => {
+export const AuthSocketAuthRequestTokenResponseValidate = (o?: AuthSocketAuthRequestTokenResponse, opts: AuthSocketAuthRequestTokenResponseOptions = {}, path: string = 'AuthSocketAuthRequestTokenResponse::root.'): Error | null => {
     if (opts.checkOptionalsAreSet && opts.allOptionalsAreSet) return new Error(path + ': only one of checkOptionalsAreSet or allOptionalNonDefault can be set for each message')
     if (typeof o !== 'object' || o === null) return new Error(path + ': object is not an instance of an object or is null')
-
-    if (typeof o.request_token !== 'string') return new Error(`${path}.request_token: is not a string`)
-    if (opts.request_token_CustomCheck && !opts.request_token_CustomCheck(o.request_token)) return new Error(`${path}.request_token: custom check failed`)
 
     if (typeof o.expires_at !== 'number') return new Error(`${path}.expires_at: is not a number`)
     if (opts.expires_at_CustomCheck && !opts.expires_at_CustomCheck(o.expires_at)) return new Error(`${path}.expires_at: custom check failed`)
 
+    if (typeof o.request_token !== 'string') return new Error(`${path}.request_token: is not a string`)
+    if (opts.request_token_CustomCheck && !opts.request_token_CustomCheck(o.request_token)) return new Error(`${path}.request_token: custom check failed`)
+
     return null
 }
 
-export type SocketClientHello = {
+export type AuthSocketClientHello = {
     client_key: string
     protocol_version: number
     request_token?: string
 }
-export type SocketClientHelloOptionalField = 'request_token'
-export const SocketClientHelloOptionalFields: SocketClientHelloOptionalField[] = ['request_token']
-export type SocketClientHelloOptions = OptionsBaseMessage & {
-    checkOptionalsAreSet?: SocketClientHelloOptionalField[]
+export type AuthSocketClientHelloOptionalField = 'request_token'
+export const AuthSocketClientHelloOptionalFields: AuthSocketClientHelloOptionalField[] = ['request_token']
+export type AuthSocketClientHelloOptions = OptionsBaseMessage & {
+    checkOptionalsAreSet?: AuthSocketClientHelloOptionalField[]
+    client_key_CustomCheck?: (v: string) => boolean
     protocol_version_CustomCheck?: (v: number) => boolean
     request_token_CustomCheck?: (v?: string) => boolean
-    client_key_CustomCheck?: (v: string) => boolean
 }
-export const SocketClientHelloValidate = (o?: SocketClientHello, opts: SocketClientHelloOptions = {}, path: string = 'SocketClientHello::root.'): Error | null => {
+export const AuthSocketClientHelloValidate = (o?: AuthSocketClientHello, opts: AuthSocketClientHelloOptions = {}, path: string = 'AuthSocketClientHello::root.'): Error | null => {
     if (opts.checkOptionalsAreSet && opts.allOptionalsAreSet) return new Error(path + ': only one of checkOptionalsAreSet or allOptionalNonDefault can be set for each message')
     if (typeof o !== 'object' || o === null) return new Error(path + ': object is not an instance of an object or is null')
 
@@ -277,6 +277,25 @@ export const SocketClientHelloValidate = (o?: SocketClientHello, opts: SocketCli
 
     if ((o.request_token || opts.allOptionalsAreSet || opts.checkOptionalsAreSet?.includes('request_token')) && typeof o.request_token !== 'string') return new Error(`${path}.request_token: is not a string`)
     if (opts.request_token_CustomCheck && !opts.request_token_CustomCheck(o.request_token)) return new Error(`${path}.request_token: custom check failed`)
+
+    return null
+}
+
+export type AuthSocketResponse = {
+    payload: AuthSocketResponse_payload
+}
+export const AuthSocketResponseOptionalFields: [] = []
+export type AuthSocketResponseOptions = OptionsBaseMessage & {
+    checkOptionalsAreSet?: []
+    payload_Options?: AuthSocketResponse_payloadOptions
+}
+export const AuthSocketResponseValidate = (o?: AuthSocketResponse, opts: AuthSocketResponseOptions = {}, path: string = 'AuthSocketResponse::root.'): Error | null => {
+    if (opts.checkOptionalsAreSet && opts.allOptionalsAreSet) return new Error(path + ': only one of checkOptionalsAreSet or allOptionalNonDefault can be set for each message')
+    if (typeof o !== 'object' || o === null) return new Error(path + ': object is not an instance of an object or is null')
+
+    const payloadErr = AuthSocketResponse_payloadValidate(o.payload, opts.payload_Options, `${path}.payload`)
+    if (payloadErr !== null) return payloadErr
+    
 
     return null
 }
@@ -436,21 +455,44 @@ export const TokensDataValidate = (o?: TokensData, opts: TokensDataOptions = {},
     return null
 }
 
-export type SocketErrorMessage = {
-    error: string
+
+
+
+
+export enum AuthSocketResponse_payload_type {
+    REQUEST_TOKEN = 'request_token',
+    TOKENS = 'tokens',
 }
-export const SocketErrorMessageOptionalFields: [] = []
-export type SocketErrorMessageOptions = OptionsBaseMessage & {
-    checkOptionalsAreSet?: []
-    error_CustomCheck?: (v: string) => boolean
+export const enumCheckAuthSocketResponse_payload_type = (e?: AuthSocketResponse_payload_type): boolean => {
+    for (const v in AuthSocketResponse_payload_type) if (e === v) return true
+    return false
 }
-export const SocketErrorMessageValidate = (o?: SocketErrorMessage, opts: SocketErrorMessageOptions = {}, path: string = 'SocketErrorMessage::root.'): Error | null => {
-    if (opts.checkOptionalsAreSet && opts.allOptionalsAreSet) return new Error(path + ': only one of checkOptionalsAreSet or allOptionalNonDefault can be set for each message')
+export type AuthSocketResponse_payload = 
+    {type:AuthSocketResponse_payload_type.REQUEST_TOKEN, request_token:AuthSocketAuthRequestTokenResponse}|
+    {type:AuthSocketResponse_payload_type.TOKENS, tokens:TokensData}
+
+export type AuthSocketResponse_payloadOptions = {
+    request_token_Options?: AuthSocketAuthRequestTokenResponseOptions
+    tokens_Options?: TokensDataOptions
+}
+export const AuthSocketResponse_payloadValidate = (o?: AuthSocketResponse_payload, opts:AuthSocketResponse_payloadOptions = {}, path: string = 'AuthSocketResponse_payload::root.'): Error | null => {
     if (typeof o !== 'object' || o === null) return new Error(path + ': object is not an instance of an object or is null')
+    const stringType: string = o.type
+    switch (o.type) {
+        case AuthSocketResponse_payload_type.REQUEST_TOKEN:
+        const request_tokenErr = AuthSocketAuthRequestTokenResponseValidate(o.request_token, opts.request_token_Options, `${path}.request_token`)
+        if (request_tokenErr !== null) return request_tokenErr
+        
 
-    if (typeof o.error !== 'string') return new Error(`${path}.error: is not a string`)
-    if (opts.error_CustomCheck && !opts.error_CustomCheck(o.error)) return new Error(`${path}.error: custom check failed`)
+        break
+        case AuthSocketResponse_payload_type.TOKENS:
+        const tokensErr = TokensDataValidate(o.tokens, opts.tokens_Options, `${path}.tokens`)
+        if (tokensErr !== null) return tokensErr
+        
 
+        break
+        default:
+            return new Error(path + ': unknown type '+ stringType)
+    }
     return null
 }
-

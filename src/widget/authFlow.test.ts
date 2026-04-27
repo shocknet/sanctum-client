@@ -16,6 +16,7 @@ class MockWebSocket {
   onclose: ((ev: any) => void) | null = null;
   onerror: ((ev: any) => void) | null = null;
   sent: string[] = [];
+  private listeners: Record<string, Array<(ev: any) => void>> = {};
 
   constructor(url: string) {
     this.url = url;
@@ -23,6 +24,7 @@ class MockWebSocket {
     queueMicrotask(() => {
       this.readyState = MockWebSocket.OPEN;
       this.onopen?.({});
+      this.emit('open', {});
     });
   }
 
@@ -30,13 +32,25 @@ class MockWebSocket {
     this.sent.push(String(data));
   }
 
+  addEventListener(type: string, handler: (ev: any) => void) {
+    (this.listeners[type] ??= []).push(handler);
+  }
+
+  private emit(type: string, event: any) {
+    for (const handler of this.listeners[type] ?? []) {
+      handler(event);
+    }
+  }
+
   close() {
     this.readyState = MockWebSocket.CLOSED;
     this.onclose?.({});
+    this.emit('close', {});
   }
 
   emitMessage(obj: unknown) {
     this.onmessage?.({ data: JSON.stringify(obj) });
+    this.emit('message', { data: JSON.stringify(obj) });
   }
 }
 
@@ -76,16 +90,28 @@ describe('Integration flows', () => {
     expect(ws).toBeTruthy();
 
     // Server can send request token first
-    ws!.emitMessage({ request_token: 'req-1', expires_at: Date.now() + 30_000 });
+    ws!.emitMessage({
+      status: 'OK',
+      payload: {
+        type: 'request_token',
+        request_token: { request_token: 'req-1', expires_at: Date.now() + 30_000 }
+      }
+    });
 
     // Then tokens complete the flow
     ws!.emitMessage({
-      access_token: 'a',
-      refresh_token: 'r',
-      expires_at: Date.now() + 60_000,
-      refresh_expires_at: Date.now() + 3_600_000,
-      identifier: 'npub123',
-      account_identifier: 'demo@example.com'
+      status: 'OK',
+      payload: {
+        type: 'tokens',
+        tokens: {
+          access_token: 'a',
+          refresh_token: 'r',
+          expires_at: Date.now() + 60_000,
+          refresh_expires_at: Date.now() + 3_600_000,
+          identifier: 'npub123',
+          account_identifier: 'demo@example.com'
+        }
+      }
     });
 
     const tokens = await startPromise;
